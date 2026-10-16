@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Uber Golf</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+</head>
+<body>
+<style>
+/* Layout: one column of stages. Finished stages collapse, the current stage is open, later stages stay locked until the current one is complete. */
+:root{
+  --bg:#edf1ef; --surface:#ffffff; --ink:#14211c; --muted:#53635c; --line:#cfd8d4;
+  --accent:#0b6b4f; --accent-ink:#ffffff; --warn:#fff1c9; --warn-ink:#4a3600; --done:#dbeee6; --lock:#e4e9e6;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif; --body:"Barlow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1714; --surface:#17221e; --ink:#e7efeb; --muted:#9fb0a8; --line:#2a3a34;
+  --accent:#4cc79a; --accent-ink:#06261b; --warn:#3a3115; --warn-ink:#f5e2a6; --done:#1c3a2f; --lock:#131c18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1714; --surface:#17221e; --ink:#e7efeb; --muted:#9fb0a8; --line:#2a3a34;
+  --accent:#4cc79a; --accent-ink:#06261b; --warn:#3a3115; --warn-ink:#f5e2a6; --done:#1c3a2f; --lock:#131c18; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.4;margin:0;
+  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+main{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:14px 0 10px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--display);font-size:2rem;line-height:1;margin:0}
+.sub{margin:4px 0 8px;color:var(--muted);font-size:.95rem}
+.meter{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stage.done{background:var(--done)}
+.stage.locked{background:var(--lock);color:var(--muted)}
+.head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 14px;min-height:56px;width:100%;
+  background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.stage.locked .head{cursor:default}
+.head:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.name{font-family:var(--display);font-size:1.3rem;line-height:1.1}
+.when{display:block;font-size:.88rem;color:var(--muted)}
+.state{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--accent)}
+.stage.locked .state{color:var(--muted)}
+.body{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+.where{background:var(--warn);color:var(--warn-ink);border-radius:6px;padding:8px 10px;font-size:.92rem;font-weight:500}
+.focus{margin:0;font-size:.98rem}
+h3{font-family:var(--display);font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:4px 0 0}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+li label{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-height:48px;cursor:pointer;background:var(--bg)}
+li input{width:24px;height:24px;margin:1px 0 0;accent-color:var(--accent);flex:none}
+li .t{min-width:0;flex:1}
+li b{display:block;font-weight:600}
+li small{display:block;color:var(--muted);font-size:.9rem}
+li input:checked + .t{opacity:.55}
+.links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.92rem}
+.links a{color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;cursor:pointer;background:var(--bg);font-weight:500;font-size:.92rem}
+.chips input{width:20px;height:20px;accent-color:var(--accent)}
+.actions{display:flex;flex-direction:column;gap:8px}
+.go{min-height:52px;border:0;border-radius:6px;background:var(--accent);color:var(--accent-ink);font:700 1.1rem var(--display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.go:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+.go:focus-visible,.skip button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.need{margin:0;font-size:.9rem;color:var(--muted)}
+.skip{font-size:.88rem;color:var(--muted)}
+.skip button{font:inherit;background:none;border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:8px 12px;min-height:40px;cursor:pointer;margin-right:6px}
+.tabs{display:flex;gap:6px;margin-top:10px}
+.tabs button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:600 1rem var(--body);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:2px solid var(--accent);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card .kicker{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.card h2{font-family:var(--display);font-size:1.9rem;line-height:1.05;margin:0}
+.card p{margin:0}
+.pace{background:var(--warn);color:var(--warn-ink);border-radius:6px;padding:8px 10px;font-size:.92rem}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:.85rem}
+.foot button{font:inherit;background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);padding:8px 12px;min-height:40px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+</style>
+<main>
+  <header>
+    <h1>Golf Plan Tracker</h1>
+    <p class="sub" id="sub"></p>
+    <div class="meter" aria-hidden="true"><i id="fill"></i></div>
+    <div class="tabs"><button type="button" id="tabT" aria-pressed="true">Today</button><button type="button" id="tabP" aria-pressed="false">Whole plan</button></div>
+  </header>
+  <div id="today"></div>
+  <div id="stages"></div>
+  <div class="foot"><span>Progress is saved in this browser.</span><button type="button" id="reset">Start over</button></div>
+</main>
+<script>
+var V={
+ ball:["Ball position and alignment","https://www.youtube.com/watch?v=hHVwZCaNJMM"],
+ stick:["Using alignment sticks","https://www.youtube.com/watch?v=CW0XkyMOd0E"],
+ grip:["How to grip a golf club (Titleist)","https://www.youtube.com/watch?v=FZoZMTbr1VA"],
+ step:["Weight-shift and step drill","https://www.youtube.com/watch?v=08psc68Nbsc"],
+ chair:["Chair drill for early extension","https://www.youtube.com/watch?v=RCJB3YRX4Rg"],
+ chunk:["Wedge chunk fix","https://www.youtube.com/watch?v=gfqiJ80i11Q"],
+ wing:["Fix the chicken wing","https://www.youtube.com/watch?v=LT-trEuoOD4"],
+ glove:["Glove under the lead arm","https://www.youtube.com/watch?v=Z1fgcFOwTpQ"],
+ rel:["Release drill","https://www.youtube.com/watch?v=1KPkyTkQxtU"],
+ split:["Split grip drill (takeaway)","https://www.youtube.com/watch?v=YGLtp_IshaE"],
+ gate:["Start line drill","https://www.youtube.com/watch?v=VgpX4StL6tU"],
+ clock:["Wedge clock system","https://www.youtube.com/watch?v=I-nzA1ANnYw"],
+ hard:["Chipping off hardpan","https://www.youtube.com/watch?v=uD-r12xNV4c"],
+ tight:["Chipping from tight lies","https://m.youtube.com/watch?v=fwrrd1WnXks"],
+ pgate:["Putting gate drills","https://www.youtube.com/watch?v=LCpF5bIavpE"],
+ pclock:["Putting clock drill","https://www.youtube.com/watch?v=rhamXqEhXr4"],
+ ppace:["Putting pace control","https://www.youtube.com/watch?v=MW_3nHv7DxA"],
+ pdist:["Judge your putting distance","https://www.youtube.com/watch?v=FKS08KNPaJc"]
+};
+var CP="Checkpoint session: 10 balls each. Screenshot each table. Export the best and worst ball per club. Send them to Claude with one line on what felt different.";
+var S=[
+{id:"s0",name:"Week 1 · Set up once",when:"Oct 19 to 25",where:"Outdoors if the weather allows. This is the start of your grass window.",
+ focus:"No swing changes. Set up the things that never change: ball position, aim, grip, and your baselines.",sessions:3,
+ tasks:[
+  ["Two grip photos","Hands filling the frame, well lit. One from the front, one from behind. If the lead hand shows three or more knuckles, weaken it to two."],
+  ["Two address photos","A stick along your toes. One face-on, one down the line."],
+  ["Ball position set with sticks","Irons and wedges at center. Fairway woods 2 to 3 inches forward. Keep your tested driver spot."],
+  ["Turn on the TrackMan columns once","Ball speed, smash, launch direction, spin axis, club path, face angle, face to path, attack angle, carry."],
+  ["Grass baseline","10 balls each with the 54, 50, PW and 8-iron on real grass."],
+  ["40 to 80 yard ladder baseline","5 balls each at 40, 50, 60, 70, 80 with the 58, 54 and 50. Guess the carry out loud first, then check."],
+  ["54 versus 58 bounce test","Try the lower-bounce 58 on tight and hardpan lies before buying anything."],
+  ["Calibrate your pace","Walk 30 yards and count steps. Walk 30 feet for putts. Write both on a card."]],
+ vids:["ball","stick","grip","clock","hard"]},
+{id:"s1",name:"Weeks 2 to 4 · The move, wedges and short irons",when:"Oct 26 to Nov 15",where:"Put Session C and one swing session outdoors each week while the grass lasts.",
+ focus:"One cue: seat back, move toward the target, chest finishes at the flag. Aim it at a line on the turf.",sessions:9,
+ tasks:[
+  ["Step drill learned and done","Ask your doctor or physical therapist first."],
+  ["Chair drill learned and done","Backside on a chair back, lead glute stays on it through impact."],
+  ["Hold every finish for 3 seconds","Chest at the target. If you cannot hold it, your body stalled."],
+  ["Chunk work on real turf, 3 times","Line on the turf and a towel 4 inches behind the ball. Ball first, then turf at or past the line."],
+  ["Putting on a real green, 2 times","Gate drill, three-distance zone, around the clock."],
+  ["Checkpoint 1 done",CP+" Clubs: 9-iron, 7-iron, 7-wood, 5-wood."],
+  ["Checkpoint 1 numbers met","Weak iron strikes 40% or less. Iron face-to-path +8° or less. 5-wood face-to-path spread 8° or less. Hooks 70% or less of tournament misses."]],
+ vids:["step","chair","chunk","pgate","pclock"]},
+{id:"s2",name:"Weeks 5 to 8 · The release and the iron face",when:"Nov 16 to Dec 13",where:"Indoors from here. Do the drills in the bay or at home with no ball.",
+ focus:"Same cue. Add the release so the lead arm does not fold and the iron face is not held open.",sessions:9,
+ tasks:[
+  ["Lead-arm drill","Glove or headcover under the lead armpit, half swings."],
+  ["Waist-to-waist swings","Both arms straight at the finish."],
+  ["Split-hand swings","Hands a few inches apart, slow."],
+  ["Start-line gate","Two tees a foot apart, 3 feet ahead of the ball."],
+  ["Putting on a mat, 3 times","Gate and clock drills. Speed will not match a real green."],
+  ["Checkpoint 2 done",CP+" Clubs: 9-iron, 7-iron, 7-wood, 5-wood, driver."],
+  ["Checkpoint 2 numbers met","Weak iron strikes 25% or less. Iron face-to-path +5° or less. 5-wood spread 7° or less. Driver spread 9° or less. Hooks 65% or less."]],
+ vids:["wing","glove","rel","split","gate"]},
+{id:"s3",name:"Weeks 9 to 12 · Fairway woods and long irons",when:"Dec 14 to Jan 10",where:"Indoors. Keep the towel and line check on the mat.",
+ focus:"7-wood, 5-wood, 5-iron and any hybrid. Ball position forward, aim square, one wedge set a week.",sessions:9,
+ tasks:[
+  ["Wood ball position checked with sticks every session",""],
+  ["One wedge set a week","So the move does not fade."],
+  ["Guess-then-check on the ladder","Say your guess for the carry before each ball. Write the error."],
+  ["Checkpoint 3 done",CP+" Same five clubs."],
+  ["Checkpoint 3 numbers met","Weak iron strikes 15% or less. Iron face-to-path within ±3°. 5-wood spread 6° or less. Driver spread 7° or less. Hooks 55% or less."]],
+ vids:["ball","clock","ppace"]},
+{id:"s4",name:"Weeks 13 to 16 · The driver",when:"Jan 11 to Feb 7",where:"Indoors.",
+ focus:"Driver on your tested ball position. End each swing session with 5 drivers as a guardrail.",sessions:9,
+ tasks:[
+  ["5 drivers at the end of each swing session","If the face-to-path spread gets wider, send Claude the clips before changing anything."],
+  ["Keep wedges and irons at a quarter of each session",""],
+  ["Checkpoint 4 done",CP+" Same five clubs."],
+  ["Checkpoint 4 numbers met","Driver face-to-path within -3° to +1°, spread 5° or less. Hooks 50% or less. Putts per 18: 32 or fewer."]],
+ vids:["pdist","ppace"]},
+{id:"s5",name:"Weeks 17 and 18 · Taper",when:"Feb 8 to 21",where:"Indoors.",
+ focus:"No new drills. Keep the cue and the shot routine. Put extra time into the ladder, chipping and putting.",sessions:5,
+ tasks:[
+  ["Decide the 58 or the 54 for the trip",""],
+  ["Check clubs and balls for the trip",""],
+  ["Rest the day before you travel",""]],
+ vids:["clock","tight"]},
+{id:"s6",name:"Florida · Feb 22 to 28",when:"The trip",where:"Real grass for the first time since November.",
+ focus:"Take a practice day before the first round. Putt first, then the ladder, then irons, woods and driver.",sessions:0,
+ tasks:[
+  ["Practice day on grass before the first round","Putt 15 to 20 minutes first."],
+  ["Re-measure your carry for every club","Replace your sim yardages with these."],
+  ["Chip from tight lies","Putter or fairway wood when the ball sits down. Skip the 60."],
+  ["Play with your son and log the round","Hooks, straight, right. Putts. Up-and-downs."]],
+ vids:["hard","tight","pdist"]}
+];
+var K="gpt:v1", st={done:{},skip:{}};
+try{var raw=localStorage.getItem(K);if(raw)st=JSON.parse(raw)}catch(e){}
+if(!st.done)st.done={};if(!st.skip)st.skip={};
+function save(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}}
+function need(s){var n=[];s.tasks.forEach(function(t,i){n.push(s.id+"t"+i)});for(var j=0;j<s.sessions;j++)n.push(s.id+"s"+j);return n}
+function complete(s){return !!st.skip[s.id]||need(s).every(function(k){return st.done[k]})}
+function esc(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+var open={},confirmSkip="";
+function render(){
+  var cur=-1;for(var i=0;i<S.length;i++){if(!complete(S[i])){cur=i;break}}
+  var doneN=S.filter(complete).length;
+  document.getElementById("fill").style.width=(doneN*100/S.length)+"%";
+  document.getElementById("sub").textContent=cur<0?"Every stage is complete.":("Stage "+(cur+1)+" of "+S.length+": "+S[cur].name);
+  renderToday(cur);
+  var h="";
+  S.forEach(function(s,i){
+    var state=complete(s)?"done":(i===cur?"current":"locked");
+    var isOpen=state==="current"||(state==="done"&&open[s.id]);
+    var label=state==="done"?"Done":(state==="current"?"Now":"Locked");
+    h+='<section class="stage '+state+'"><button class="head" type="button" data-id="'+s.id+'" '+(state==="locked"?'aria-disabled="true"':'')+' aria-expanded="'+isOpen+'"><span><span class="name">'+esc(s.name)+'</span><span class="when">'+esc(s.when)+'</span></span><span class="state">'+label+'</span></button>';
+    if(state==="locked"){h+='</section>';return}
+    if(isOpen){
+      h+='<div class="body"><div class="where">'+esc(s.where)+'</div><p class="focus">'+esc(s.focus)+'</p>';
+      h+='<h3>To do</h3><ul>';
+      s.tasks.forEach(function(t,j){var k=s.id+"t"+j;
+        h+='<li><label><input type="checkbox" data-k="'+k+'" '+(st.done[k]?'checked':'')+'><span class="t"><b>'+esc(t[0])+'</b>'+(t[1]?'<small>'+esc(t[1])+'</small>':'')+'</span></label></li>'});
+      h+='</ul>';
+      if(s.sessions){
+        h+='<h3>Sessions done</h3><div class="chips">';
+        for(var q=0;q<s.sessions;q++){var kk=s.id+"s"+q;h+='<label><input type="checkbox" data-k="'+kk+'" '+(st.done[kk]?'checked':'')+'>'+(q+1)+'</label>'}
+        h+='</div>';
+      }
+      if(s.vids&&s.vids.length){
+        h+='<h3>Watch</h3><div class="links">'+s.vids.map(function(v){return '<a href="'+V[v][1]+'" target="_blank" rel="noopener">'+esc(V[v][0])+'</a>'}).join("")+'</div>';
+      }
+      if(state==="current"){
+        var left=need(s).filter(function(k){return !st.done[k]}).length;
+        h+='<div class="actions"><button class="go" type="button" data-next="'+s.id+'" '+(left?'disabled':'')+'>Stage complete, unlock the next one</button>';
+        h+='<p class="need">'+(left?left+' item'+(left>1?'s':'')+' left before the next stage unlocks.':'All done.')+'</p>';
+        if(left){
+          if(confirmSkip===s.id) h+='<div class="skip">Skip this stage without finishing it? <button type="button" data-skipyes="'+s.id+'">Yes, skip</button><button type="button" data-skipno="1">Cancel</button></div>';
+          else h+='<div class="skip"><button type="button" data-skip="'+s.id+'">Skip this stage</button></div>';
+        }
+        h+='</div>';
+      }
+      h+='</div>';
+    }
+    h+='</section>';
+  });
+  document.getElementById("stages").innerHTML='<div style="display:flex;flex-direction:column;gap:12px">'+h+'</div>';
+}
+var view="today";
+try{view=localStorage.getItem("gpt:view")||"today"}catch(e){}
+var ENDS=["2026-10-25","2026-11-15","2026-12-13","2027-01-10","2027-02-07","2027-02-21","2027-02-28"];
+function renderToday(cur){
+  document.getElementById("stages").style.display=view==="plan"?"":"none";
+  document.getElementById("today").style.display=view==="today"?"":"none";
+  document.getElementById("tabT").setAttribute("aria-pressed",view==="today");
+  document.getElementById("tabP").setAttribute("aria-pressed",view==="plan");
+  var el=document.getElementById("today");
+  if(cur<0){el.innerHTML='<div class="card"><span class="kicker">All done</span><h2>Plan complete</h2><p>Every stage is finished. Go beat your son.</p></div>';return}
+  var s=S[cur],ti=-1;
+  for(var i=0;i<s.tasks.length;i++){if(!st.done[s.id+"t"+i]){ti=i;break}}
+  var sd=0;for(var q=0;q<s.sessions;q++){if(st.done[s.id+"s"+q])sd++}
+  var left=need(s).filter(function(k){return !st.done[k]}).length;
+  var days=Math.ceil((new Date(ENDS[cur]+"T23:59:59")-new Date())/864e5);
+  var pace=days>=0?("Target for this stage: "+ENDS[cur]+" ("+days+" day"+(days===1?"":"s")+" away). "+left+" item"+(left===1?"":"s")+" left. Finish early and you move on early."):("Past the target date of "+ENDS[cur]+". Nothing locks you out. "+left+" item"+(left===1?"":"s")+" left.");
+  var h='<div class="card"><span class="kicker">'+esc(s.name)+'</span>';
+  if(ti>=0){
+    var t=s.tasks[ti];
+    h+='<h2>'+esc(t[0])+'</h2>'+(t[1]?'<p>'+esc(t[1])+'</p>':'')+'<div class="where">'+esc(s.where)+'</div>';
+    if(s.vids&&s.vids.length)h+='<div class="links">'+s.vids.map(function(v){return '<a href="'+V[v][1]+'" target="_blank" rel="noopener">'+esc(V[v][0])+'</a>'}).join("")+'</div>';
+    h+='<button class="go" type="button" data-tdone="'+s.id+'t'+ti+'">Done, show the next card</button>';
+  }else if(sd<s.sessions){
+    h+='<h2>Log a session</h2><p>Session '+(sd+1)+' of '+s.sessions+' for this stage.</p><button class="go" type="button" data-tdone="'+s.id+'s'+sd+'">Session done</button>';
+  }else{
+    h+='<h2>Stage complete</h2><p>Everything here is finished.</p><button class="go" type="button" data-tnext="1">Next stage</button>';
+  }
+  h+='<div class="pace">'+esc(pace)+'</div></div>';
+  el.innerHTML=h;
+}
+document.addEventListener("click",function(e){
+  var t=e.target;
+  if(t.id==="tabT"||t.id==="tabP"){view=t.id==="tabT"?"today":"plan";try{localStorage.setItem("gpt:view",view)}catch(x){}render();return}
+  if(t.dataset&&t.dataset.tdone){st.done[t.dataset.tdone]=true;save();render();window.scrollTo(0,0);return}
+  if(t.dataset&&t.dataset.tnext){render();return}
+  var hd=t.closest&&t.closest(".head");
+  if(hd&&hd.getAttribute("aria-disabled")!=="true"){var id=hd.dataset.id;open[id]=!open[id];render();return}
+  if(t.dataset&&t.dataset.skip){confirmSkip=t.dataset.skip;render();return}
+  if(t.dataset&&t.dataset.skipno){confirmSkip="";render();return}
+  if(t.dataset&&t.dataset.skipyes){st.skip[t.dataset.skipyes]=true;confirmSkip="";save();render();return}
+  if(t.dataset&&t.dataset.next){window.scrollTo({top:0,behavior:"smooth"});render();return}
+});
+document.addEventListener("change",function(e){
+  var t=e.target;
+  if(t.dataset&&t.dataset.k){st.done[t.dataset.k]=t.checked;save();var y=window.scrollY;render();window.scrollTo(0,y)}
+});
+document.getElementById("reset").addEventListener("click",function(){
+  if(confirmSkip==="reset"){st={done:{},skip:{}};confirmSkip="";save();render();this.textContent="Start over";return}
+  confirmSkip="reset";this.textContent="Tap again to erase progress";
+});
+render();
+</script>
+
+</body>
+</html>
