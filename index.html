@@ -61,45 +61,66 @@ const PHASES=[
  {w:[9,12],name:"Transfer",lift:"Lighter loads, fast intent, rotational power. 2 reps in reserve.",
   cues:{9:"Coach to set",10:"Coach to set",11:"Coach to set",12:"Coach to set"}}];
 const DAYS=[
- {d:1,n:"Monday",t:"bay",label:"Bay session",mins:"45-60"},
- {d:2,n:"Tuesday",t:"A",label:"Workout A — heavy legs and core",mins:"45"},
- {d:3,n:"Wednesday",t:"B",label:"Workout B — upper body and rotation",mins:"45"},
- {d:4,n:"Thursday",t:"bay",label:"Bay session",mins:"45-60"},
- {d:5,n:"Friday",t:"C",label:"Workout C — moderate full body",mins:"45"},
+ {d:1,n:"Monday",t:"bay",label:"Bay session",mins:"60"},
+ {d:2,n:"Tuesday",t:"A",label:"Workout A — heavy legs and core",mins:"60"},
+ {d:3,n:"Wednesday",t:"B",label:"Workout B — upper body and rotation",mins:"60"},
+ {d:4,n:"Thursday",t:"bay",label:"Bay session",mins:"60"},
+ {d:5,n:"Friday",t:"C",label:"Workout C — moderate full body",mins:"60"},
  {d:6,n:"Saturday",t:"sbay",label:"Short bay — one block",mins:"30-40"},
- {d:7,n:"Sunday",t:"round",label:"18 holes plus a brisk walk",mins:"—"}];
+ {d:7,n:"Sunday",t:"round",label:"18 holes at the bay",mins:"90 + 2 h walk"}];
 const STEPS={
- bay:["Morning: GolfForever 10-15 min (mobility, rotation, bands)",
-  "Warm-up 10 min — uncounted, never exported",
+ bay:["Warm-up 10 min — uncounted, never exported",
   "Driver block, 10-15 shots. Current cue only.",
   "7-iron block, 10-15 shots. Current cue only.",
   "Stop a block if smash drops 0.05 below block 1, or the last 5 are 1.8 deg more out-to-in than the first 5",
   "THEN the drill block: 9i or wedge, partial speed, 8-10 reps. Logged separately.",
   "Export the session JSON and bring it to Claude with the master file"],
- sbay:["Morning: GolfForever 10-15 min",
-  "Warm-up 10 min",
+ sbay:["Warm-up 10 min",
   "ONE block only — driver or 7-iron, not both",
   "Same stop rules",
   "Drill block after, if there is time",
   "Export the JSON"],
- A:["Morning: GolfForever 10-15 min — no heavy lower body today",
-  "Squat pattern, hinge pattern, loaded carry, core",
-  "Week 1: find the load where 8-10 reps leaves 3 in reserve. Log it as the anchor.",
-  "Later weeks: load to the anchor, add per the phase rule",
-  "Log load, sets, reps and RIR",
-  "Nothing heavy touches the legs again before Thursday"],
- B:["Morning: GolfForever 10-15 min",
-  "Press, row, rotation, anti-rotation. No heavy legs.",
-  "Log load, sets, reps and RIR"],
- C:["Morning: GolfForever 10-15 min",
-  "Moderate full body. Lower-body loads at 70% or less of Tuesday.",
-  "Log load, sets, reps and RIR"],
- round:["Morning: GolfForever 10-15 min",
-  "Play 18 in the bay",
+ A:[],B:[],C:[],
+ round:["Play 18 in the bay - 90 min",
   "Export it, but tag it as a ROUND. Round shots never pool with block shots.",
   "Log the score and anything patterned",
-  "Brisk walk 45-60 min (summer: walk the course)"]};
-const DAILY=["Three walks","Log food"];
+  "Walk 2 hours - separate from the round, outside the session budget",
+  "In spring these combine: one 4 hour round walking the course with clubs"]};
+const WA=["Warm-up 5-10 min: no-ball golf reps, hips, T-spine",
+  "Goblet squat - 3 x 8-10, 3 RIR (one DB at chest, box or chair behind as depth target)",
+  "Dumbbell RDL - 3 x 8-10, 3 RIR (two DBs, hinge to mid-shin, flat back)",
+  "Split squat, rear foot on floor - 2 x 8 per side, 3 RIR",
+  "Suitcase carry - 3 x 30-40 sec per side (one DB, ribs down)",
+  "Pallof press - 3 x 10 per side (band at chest height)",
+  "Dead bug - 2 x 8 per side",
+  "Log load, sets, reps and RIR",
+  "Nothing heavy touches the legs again before Thursday"];
+const WB=["Warm-up 5-10 min: no-ball golf reps, hips, T-spine",
+  "One-arm DB row - 3 x 8-12 per side, 2 RIR (hand on box or chair)",
+  "DB floor press - 3 x 8-12, 2 RIR (two DBs, lying on the mat)",
+  "Band chop, high to low - 3 x 10 per side",
+  "Half-kneeling band lift, low to high - 2 x 10 per side",
+  "Band pull-apart - 2 x 15 (light band)",
+  "Open book T-spine rotation - 2 x 8 per side",
+  "Log load, sets, reps and RIR"];
+const WC=["Warm-up 5-10 min: no-ball golf reps, hips, T-spine",
+  "DB deadlift from floor - 3 x 8, 4 RIR (light)",
+  "Goblet box squat - 2 x 10 (70% or less of Tuesday's load)",
+  "One-arm DB row - 3 x 10",
+  "Push-up, hands on box if needed - 3 x 10",
+  "Farmer carry - 3 x 30-40 sec (two DBs)",
+  "Single-leg balance with rotational reach - 2 x 8 per side",
+  "Log load, sets, reps and RIR"];
+const POWER="Med ball rotational throw into a wall - 4 x 5 per side. Do this FIRST, while fresh, and drop one set of the carry.";
+const DAILY=["3 mile hike - if time allows, outside the session budget","Log food"];
+const MORNING="Warm-up: GolfForever 10-15 min (mobility, rotation, bands) - this is the warm-up, not an extra session";
+function stepsFor(t,w){
+ if(t==="A")return [MORNING+" - no heavy lower body today"].concat(w>=9?[POWER]:[]).concat(WA.slice(1));
+ if(t==="B")return [MORNING].concat(WB.slice(1));
+ if(t==="C")return [MORNING].concat(w>=9?[POWER]:[]).concat(WC.slice(1));
+ return [MORNING].concat(STEPS[t]||[]);
+}
+const LOADNOTE="First session with the dumbbells: find loads. Per lift, work up until 8-10 reps leaves 3 in reserve. Two or three work-up sets maximum. Write the number down - that is your anchor, and the next three weeks run at it.";
 
 function iso(d){return d.toISOString().slice(0,10)}
 function addDays(s,n){const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)}
@@ -109,10 +130,29 @@ function phaseOf(w){return PHASES.find(p=>w>=p.w[0]&&w<=p.w[1])||PHASES[2]}
 function fmt(s){const d=new Date(s+"T12:00:00");return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}
 
 const CK="btg:v1";
-let st={ticks:{},notes:{}};
-try{st=JSON.parse(localStorage.getItem(CK))||st}catch(e){}
+let st={ticks:{},notes:{},lifts:{}};
+try{st=Object.assign({ticks:{},notes:{},lifts:{}},JSON.parse(localStorage.getItem(CK))||{})}catch(e){}
 function save(){try{localStorage.setItem(CK,JSON.stringify(st))}catch(e){}}
 function tick(k,v){st.ticks[k]=v;save()}
+function exKey(line){return line.split(" - ")[0].trim()}
+function setLift(date,ex,f,v){st.lifts[date]=st.lifts[date]||{};
+ st.lifts[date][ex]=Object.assign({},st.lifts[date][ex],{[f]:v});save()}
+function lastLift(date,ex){
+ const ds=Object.keys(st.lifts).filter(d=>d<date).sort().reverse();
+ for(const d of ds){const e=st.lifts[d]&&st.lifts[d][ex];
+  if(e&&(e.load||e.reps||e.rir))return {d,e}}
+ return null}
+function liftRow(date,line){
+ const ex=exKey(line), cur=(st.lifts[date]||{})[ex]||{}, prev=lastLift(date,ex);
+ const inp=(f,ph,w)=>`<input inputmode="decimal" value="${cur[f]||""}" placeholder="${ph}"
+   onchange="setLift('${date}',${JSON.stringify(ex)},'${f}',this.value);render()"
+   style="width:${w};background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:13px">`;
+ let h=`<div style="display:flex;gap:6px;align-items:center;margin:4px 0 2px 26px;flex-wrap:wrap">
+  ${inp("load","lb","58px")}${inp("reps","reps","58px")}${inp("rir","RIR","50px")}`;
+ if(prev)h+=`<span class="note" style="font-size:12px">last ${prev.e.load||"?"} lb &times; ${prev.e.reps||"?"}, RIR ${prev.e.rir||"?"}</span>`;
+ else h+=`<span class="note" style="font-size:12px">no previous</span>`;
+ return h+`</div>`;
+}
 
 let view="today";
 try{view=localStorage.getItem("btg:view")||"today"}catch(e){}
@@ -133,9 +173,13 @@ function dayCard(date,opts){
  if(gate)h+=`<p class="warn note">${gate}</p>`;
  if(cp)h+=`<p class="warn note">Expanded protocol: 10 uncounted, driver 15, 7-iron 15 fresh and first, then the survey block (50&deg;, 9i, 5i, 5w) with one club promoted to 15 and the rest at 5.</p>`;
  if(flex)h+=`<p class="note">Move or skip this session. The week still works.</p>`;
- const steps=STEPS[day.t]||[];
+ if("ABC".includes(day.t))h+=`<p class="note">${LOADNOTE}</p>`;
+ const steps=stepsFor(day.t,w);
+ const isLift="ABC".includes(day.t);
  h+=steps.map((s,i)=>{const k=date+":"+i,on=!!st.ticks[k];
-  return `<label class="chk${on?" done":""}"><input type="checkbox" ${on?"checked":""} onchange="tick('${k}',this.checked);render()"><span>${s}</span></label>`}).join("");
+  const row=`<label class="chk${on?" done":""}"><input type="checkbox" ${on?"checked":""} onchange="tick('${k}',this.checked);render()"><span>${s}</span></label>`;
+  const logged=isLift&&/ - \d|x\d|RIR|sec/.test(s)&&!/^Warm-up|^Log load|^Nothing heavy/.test(s);
+  return row+(logged?liftRow(date,s):"")}).join("");
  h+=`<h3>Every day</h3>`+DAILY.map((s,i)=>{const k=date+":d"+i,on=!!st.ticks[k];
   return `<label class="chk${on?" done":""}"><input type="checkbox" ${on?"checked":""} onchange="tick('${k}',this.checked);render()"><span>${s}</span></label>`}).join("");
  h+=`<h3>Notes</h3><textarea onchange="st.notes['${date}']=this.value;save()" placeholder="What you felt, what you changed, anything odd">${(st.notes[date]||"").replace(/</g,"&lt;")}</textarea>`;
@@ -180,7 +224,7 @@ function viewToday(){
   const cls=p.n===p.t?"ok":p.n>0?"warn":"note";
   h+=`<tr style="cursor:pointer" onclick="goto_('${dd}')"><td>${fmt(dd)}${dd===d?' &#9664;':''}</td>
    <td>${DAYS[di].label}</td><td class="n ${cls}">${p.n}/${p.t}</td></tr>`}
- h+=`</table><p class="note">Tap any row to open that day.</p></div>`;
+ h+=`</table><p class="note">Tap any row to open that day. Session budget: one hour standard, 90 min Sunday. The hike and the Sunday walk sit outside it.</p></div>`;
  return h;
 }
 
@@ -193,6 +237,12 @@ function viewPlan(){
  <tr><td>Checkpoint 2</td><td>Mon 18 Jan 2027</td></tr>
  <tr><td>Week 12 ends</td><td>Sun 14 Feb 2027</td></tr>
  <tr><td>Checkpoint 3</td><td>Mon 15 Feb 2027</td></tr></table></div>`;
+ h+=`<div class="card"><div class="lbl">Gear</div>
+  <p class="note"><b>Need:</b> adjustable dumbbells, a pair to at least 50 lb each, 5 lb increments if you can get them. Resistance bands in several strengths, with handles and a door anchor. An exercise mat. A sturdy box, step or chair at 12-18 in.</p>
+  <p class="note"><b>Before week 9:</b> a med ball, 8-10 lb, for rotational throws.</p>
+  <p class="note"><b>For the bay:</b> a phone tripod or clamp and an alignment stick. The checkpoints need face-on and down-the-line video, and you cannot hold the phone and swing.</p>
+  <p class="note"><b>Optional:</b> an adjustable bench. Nothing in the program requires one.</p>
+  <p class="note">Lifting starts the week the dumbbells arrive. That week is the load-finding week, whatever the calendar says. The golf days are unaffected.</p></div>`;
  for(let w=1;w<=12;w++){
   const ph=phaseOf(w), s=addDays(START,(w-1)*7);
   const open=w===weekOf(iso(new Date()))?" open":"";
@@ -244,6 +294,13 @@ function viewLog(){
  let h=`<div class="card"><div class="lbl">Saved notes</div>`;
  h+=ks.length?ks.map(k=>`<p><b style="cursor:pointer" onclick="goto_('${k}')">${fmt(k)}</b><br><span class="note">${st.notes[k].replace(/</g,"&lt;").replace(/\n/g,"<br>")}</span></p>`).join(""):`<p class="note">No notes yet.</p>`;
  h+=`</div>`;
+
+ const lds=Object.keys(st.lifts).filter(d=>Object.values(st.lifts[d]).some(e=>e.load||e.reps)).sort().reverse();
+ if(lds.length){h+=`<div class="card"><div class="lbl">Lift log</div><table><tr><th>Date</th><th>Exercise</th><th class="n">Load</th><th class="n">Reps</th><th class="n">RIR</th></tr>`;
+  lds.slice(0,12).forEach(d=>Object.entries(st.lifts[d]).forEach(([ex,e])=>{
+   if(!(e.load||e.reps))return;
+   h+=`<tr><td>${d}</td><td>${ex}</td><td class="n">${e.load||""}</td><td class="n">${e.reps||""}</td><td class="n">${e.rir||""}</td></tr>`}));
+  h+=`</table></div>`}
  let done=0,tot=0;
  for(let i=0;i<84;i++){const p=progressFor(addDays(START,i));done+=p.n;tot+=p.t}
  h+=`<div class="card"><div class="lbl">Progress</div>
@@ -253,7 +310,7 @@ function viewLog(){
  <button class="act" onclick="exportProgress()">Download progress file</button>
  <label class="act" style="display:inline-block">Load progress file
   <input type="file" accept=".json,application/json" style="display:none" onchange="importProgress(this.files[0])"></label>
- <button class="act" onclick="if(confirm('Erase all ticks and notes?')){st={ticks:{},notes:{}};save();render()}">Erase</button>
+ <button class="act" onclick="if(confirm('Erase all ticks and notes?')){st={ticks:{},notes:{},lifts:{}};save();render()}">Erase</button>
  <p class="note" style="margin-top:10px">Or copy this text out by hand:</p>
  <textarea id="bk">${JSON.stringify(st)}</textarea>
  <button class="act" onclick="restore()">Restore from the box</button></div>`;
@@ -267,7 +324,7 @@ function exportProgress(){
 }
 function importProgress(f){if(!f)return;const r=new FileReader();
  r.onload=()=>{try{const v=JSON.parse(r.result);
-  if(v&&v.ticks){st={ticks:v.ticks||{},notes:v.notes||{}};save();render();alert("Progress loaded.")}
+  if(v&&v.ticks){st={ticks:v.ticks||{},notes:v.notes||{},lifts:v.lifts||{}};save();render();alert("Progress loaded.")}
   else alert("That file is not a progress backup.")}catch(e){alert("Could not read that file.")}};
  r.readAsText(f)}
 function restore(){try{const v=JSON.parse(document.getElementById("bk").value);
