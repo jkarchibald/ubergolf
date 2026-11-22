@@ -1,0 +1,537 @@
+{
+ "_note": "RECONSTRUCTED from TrackMan app screenshots, not an original JSON export. Fields absent where the screenshots did not show them. clubPath derived as faceAngle-faceToPath and validated against 7 measured values.",
+ "date": "2026-11-19",
+ "club": "Driver",
+ "shotsRecorded": 32,
+ "shots": [
+  {
+   "shot": 1,
+   "faceAngle": 3.0,
+   "faceToPath": 3.5,
+   "clubPath": -0.5,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 1,
+   "impactHeightMm": 13,
+   "ballSpeed": 121.6,
+   "smashFactor": 1.44
+  },
+  {
+   "shot": 2,
+   "faceAngle": -5.9,
+   "faceToPath": -4.2,
+   "clubPath": -1.7,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 3,
+   "impactHeightMm": 15,
+   "ballSpeed": 124.4,
+   "smashFactor": 1.46
+  },
+  {
+   "shot": 3,
+   "faceAngle": 1.6,
+   "faceToPath": 2.9,
+   "clubPath": -1.3,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 19,
+   "impactHeightMm": 20,
+   "ballSpeed": 125.4,
+   "smashFactor": 1.39
+  },
+  {
+   "shot": 4,
+   "faceAngle": 1.6,
+   "faceToPath": 3.8,
+   "clubPath": -2.2,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 16,
+   "impactHeightMm": 3,
+   "ballSpeed": 132.2,
+   "smashFactor": 1.49
+  },
+  {
+   "shot": 5,
+   "faceAngle": 2.9,
+   "faceToPath": 4.8,
+   "clubPath": -1.9,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -13,
+   "impactHeightMm": -9,
+   "ballSpeed": 127.3,
+   "smashFactor": 1.44
+  },
+  {
+   "shot": 6,
+   "faceAngle": 5.0,
+   "faceToPath": 5.6,
+   "clubPath": -0.6,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 21,
+   "impactHeightMm": 6,
+   "ballSpeed": 133.0,
+   "smashFactor": 1.47
+  },
+  {
+   "shot": 7,
+   "faceAngle": 9.5,
+   "faceToPath": 9.1,
+   "clubPath": 0.4,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 6,
+   "impactHeightMm": -12,
+   "ballSpeed": 128.9,
+   "smashFactor": 1.43
+  },
+  {
+   "shot": 8,
+   "faceAngle": 5.9,
+   "faceToPath": 7.5,
+   "clubPath": -1.6,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -16,
+   "impactHeightMm": 8,
+   "ballSpeed": 117.7,
+   "smashFactor": 1.34
+  },
+  {
+   "shot": 9,
+   "faceAngle": -1.8,
+   "faceToPath": -3.0,
+   "clubPath": 1.2,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 2,
+   "impactHeightMm": 13,
+   "ballSpeed": 126.7,
+   "smashFactor": 1.45
+  },
+  {
+   "shot": 10,
+   "ballSpeed": 129.4
+  },
+  {
+   "shot": 11,
+   "ballSpeed": 127.3,
+   "launchAngle": 15.7,
+   "launchDirection": 5.9,
+   "spinRate": 5995,
+   "carry": 184.6,
+   "total": 198.7,
+   "apexHeightFt": 85
+  },
+  {
+   "shot": 12,
+   "launchAngle": 18.6,
+   "launchDirection": 5.5,
+   "spinRate": 5343,
+   "carry": 165.2,
+   "total": 180.8,
+   "apexHeightFt": 77
+  },
+  {
+   "shot": 13,
+   "launchAngle": 20.2,
+   "launchDirection": 7.0,
+   "spinRate": 8649,
+   "carry": 149.5,
+   "total": 150.0,
+   "apexHeightFt": 82
+  },
+  {
+   "shot": 14,
+   "faceAngle": 1.9,
+   "faceToPath": 5.4,
+   "clubPath": -3.5,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -15,
+   "launchAngle": 19.6,
+   "launchDirection": 0.6,
+   "spinRate": 5856,
+   "carry": 162.2,
+   "total": 167.3,
+   "apexHeightFt": 81
+  },
+  {
+   "shot": 15,
+   "faceAngle": -0.2,
+   "faceToPath": 1.7,
+   "clubPath": -1.9,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -14,
+   "launchAngle": 18.5,
+   "launchDirection": -0.6,
+   "spinRate": 4542,
+   "carry": 195.5,
+   "total": 205.7,
+   "apexHeightFt": 99
+  },
+  {
+   "shot": 16,
+   "faceAngle": -2.2,
+   "faceToPath": -3.1,
+   "clubPath": 0.9,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -10,
+   "launchAngle": 22.3,
+   "launchDirection": -1.5,
+   "spinRate": 5597,
+   "carry": 168.5,
+   "total": 172.4,
+   "apexHeightFt": 104
+  },
+  {
+   "shot": 17,
+   "faceAngle": 0.9,
+   "faceToPath": 3.2,
+   "clubPath": -2.3,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -9,
+   "launchAngle": 17.2,
+   "launchDirection": 0.3,
+   "spinRate": 4269,
+   "carry": 206.2,
+   "total": 217.0,
+   "apexHeightFt": 100
+  },
+  {
+   "shot": 18,
+   "faceAngle": 8.3,
+   "faceToPath": 7.9,
+   "clubPath": 0.4,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -8,
+   "launchAngle": 19.8,
+   "launchDirection": 6.7,
+   "spinRate": 5740,
+   "carry": 178.7,
+   "total": 184.6,
+   "apexHeightFt": 99
+  },
+  {
+   "shot": 19,
+   "faceAngle": 2.3,
+   "faceToPath": 3.9,
+   "clubPath": -1.6,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -1,
+   "launchAngle": 18.1,
+   "launchDirection": 1.6,
+   "spinRate": 3855,
+   "carry": 213.1,
+   "total": 222.2,
+   "apexHeightFt": 105
+  },
+  {
+   "shot": 20,
+   "faceAngle": 4.0,
+   "faceToPath": 6.3,
+   "clubPath": -2.3,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -10,
+   "launchAngle": 15.6,
+   "launchDirection": 2.7,
+   "spinRate": 5900,
+   "carry": 195.4,
+   "total": 199.1,
+   "apexHeightFt": 94
+  },
+  {
+   "shot": 21,
+   "launchAngle": 17.1,
+   "launchDirection": 5.7,
+   "spinRate": 5219,
+   "carry": 190.5,
+   "total": 196.1,
+   "apexHeightFt": 93
+  },
+  {
+   "shot": 22,
+   "faceAngle": -6.2,
+   "faceToPath": -5.4,
+   "clubPath": -0.8,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 4,
+   "clubSpeed": 82.3,
+   "attackAngle": 4.5,
+   "clubPathMeasured": -0.7,
+   "launchAngle": 26.0,
+   "launchDirection": -5.0,
+   "spinRate": 5122,
+   "carry": 152.5,
+   "total": 156.5,
+   "apexHeightFt": 101
+  },
+  {
+   "shot": 23,
+   "faceAngle": -0.3,
+   "faceToPath": 3.5,
+   "clubPath": -3.8,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -15,
+   "clubSpeed": 87.9,
+   "attackAngle": -3.3,
+   "clubPathMeasured": -3.9,
+   "launchAngle": 13.3,
+   "launchDirection": -1.0,
+   "spinRate": 4325,
+   "carry": 190.8,
+   "total": 214.4,
+   "apexHeightFt": 67
+  },
+  {
+   "shot": 24,
+   "faceAngle": 7.8,
+   "faceToPath": 9.6,
+   "clubPath": -1.8,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -9,
+   "clubSpeed": 87.8,
+   "attackAngle": -1.8,
+   "clubPathMeasured": -1.8,
+   "launchAngle": 18.6,
+   "launchDirection": 5.7,
+   "spinRate": 6497,
+   "carry": 169.3,
+   "total": 179.5,
+   "apexHeightFt": 89
+  },
+  {
+   "shot": 25,
+   "launchAngle": 20.0,
+   "launchDirection": 10.6,
+   "spinRate": 5507,
+   "carry": 163.4,
+   "total": 163.3,
+   "apexHeightFt": 84
+  },
+  {
+   "shot": 26,
+   "faceAngle": 5.9,
+   "faceToPath": 9.9,
+   "clubPath": -4.0,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 24,
+   "clubSpeed": 89.7,
+   "attackAngle": -2.6,
+   "clubPathMeasured": -4.0,
+   "launchAngle": 32.6,
+   "launchDirection": 4.2,
+   "spinRate": 5636,
+   "carry": 137.7,
+   "total": 141.8,
+   "apexHeightFt": 121
+  },
+  {
+   "shot": 27,
+   "faceAngle": 1.9,
+   "faceToPath": 4.1,
+   "clubPath": -2.2,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 13,
+   "clubSpeed": 91.6,
+   "attackAngle": -3.2,
+   "clubPathMeasured": -2.2,
+   "launchAngle": 9.8,
+   "launchDirection": 1.4,
+   "spinRate": 2596,
+   "carry": 202.7,
+   "total": 238.2,
+   "apexHeightFt": 44
+  },
+  {
+   "shot": 28,
+   "faceAngle": 6.8,
+   "faceToPath": 13.2,
+   "clubPath": -6.4,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": 22,
+   "clubSpeed": 93.8,
+   "attackAngle": -3.4,
+   "clubPathMeasured": -6.4,
+   "launchAngle": 31.4,
+   "launchDirection": 4.5,
+   "spinRate": 6006,
+   "carry": 145.4,
+   "total": 149.4,
+   "apexHeightFt": 128
+  },
+  {
+   "shot": 29,
+   "launchAngle": 21.6,
+   "launchDirection": -16.4,
+   "spinRate": 11738,
+   "carry": 30.3,
+   "total": 78.2,
+   "apexHeightFt": 9
+  },
+  {
+   "shot": 30,
+   "launchAngle": 11.2,
+   "launchDirection": 0.4,
+   "spinRate": 6640,
+   "carry": 140.5,
+   "total": 157.5,
+   "apexHeightFt": 38
+  },
+  {
+   "shot": 31,
+   "faceAngle": -2.0,
+   "faceToPath": 4.5,
+   "clubPath": -6.5,
+   "clubPathSource": "derived face-faceToPath",
+   "impactOffsetMm": -25,
+   "clubSpeed": 81.7,
+   "attackAngle": -4.1,
+   "clubPathMeasured": -6.6,
+   "launchAngle": 13.5,
+   "launchDirection": -3.2,
+   "spinRate": 6367,
+   "carry": 138.3,
+   "total": 162.5,
+   "apexHeightFt": 45
+  },
+  {
+   "shot": 32,
+   "launchAngle": 9.7,
+   "launchDirection": -0.1,
+   "spinRate": 5578,
+   "carry": 160.3,
+   "total": 180.4,
+   "apexHeightFt": 41
+  }
+ ],
+ "summary": {
+  "clubPath": {
+   "n": 23,
+   "median": -1.8,
+   "mean": -1.91,
+   "sd": 1.98,
+   "min": -6.5,
+   "max": 1.2
+  },
+  "faceAngle": {
+   "n": 23,
+   "median": 1.9,
+   "mean": 2.2,
+   "sd": 4.19,
+   "min": -6.2,
+   "max": 9.5
+  },
+  "faceToPath": {
+   "n": 23,
+   "median": 4.1,
+   "mean": 4.12,
+   "sd": 4.66,
+   "min": -5.4,
+   "max": 13.2
+  },
+  "impactOffsetMm": {
+   "n": 23,
+   "median": -1,
+   "mean": -0.61,
+   "sd": 14.25,
+   "min": -25,
+   "max": 24
+  },
+  "impactHeightMm": {
+   "n": 9,
+   "median": 8,
+   "mean": 6.33,
+   "sd": 10.82,
+   "min": -12,
+   "max": 20
+  },
+  "attackAngle": {
+   "n": 7,
+   "median": -3.2,
+   "mean": -1.99,
+   "sd": 2.95,
+   "min": -4.1,
+   "max": 4.5
+  },
+  "smashFactor": {
+   "n": 9,
+   "median": 1.44,
+   "mean": 1.43,
+   "sd": 0.05,
+   "min": 1.34,
+   "max": 1.49
+  },
+  "spinRate": {
+   "n": 22,
+   "median": 5616.5,
+   "mean": 5771.68,
+   "sd": 1777.23,
+   "min": 2596,
+   "max": 11738
+  },
+  "launchAngle": {
+   "n": 22,
+   "median": 18.55,
+   "mean": 18.65,
+   "sd": 5.9,
+   "min": 9.7,
+   "max": 32.6
+  },
+  "carry": {
+   "n": 22,
+   "median": 166.85,
+   "mean": 165.48,
+   "sd": 37.93,
+   "min": 30.3,
+   "max": 213.1
+  },
+  "total": {
+   "n": 22,
+   "median": 179.95,
+   "mean": 177.98,
+   "sd": 34.37,
+   "min": 78.2,
+   "max": 238.2
+  },
+  "pctFaceWithin3ofMedian": 47.8,
+  "faceMedianUsed": 1.9,
+  "pathDerivationCheck": [
+   {
+    "shot": 22,
+    "derived": -0.8,
+    "measured": -0.7,
+    "diff": -0.1
+   },
+   {
+    "shot": 23,
+    "derived": -3.8,
+    "measured": -3.9,
+    "diff": 0.1
+   },
+   {
+    "shot": 24,
+    "derived": -1.8,
+    "measured": -1.8,
+    "diff": 0.0
+   },
+   {
+    "shot": 26,
+    "derived": -4.0,
+    "measured": -4.0,
+    "diff": 0.0
+   },
+   {
+    "shot": 27,
+    "derived": -2.2,
+    "measured": -2.2,
+    "diff": 0.0
+   },
+   {
+    "shot": 28,
+    "derived": -6.4,
+    "measured": -6.4,
+    "diff": 0.0
+   },
+   {
+    "shot": 31,
+    "derived": -6.5,
+    "measured": -6.6,
+    "diff": 0.1
+   }
+  ]
+ }
+}
