@@ -1,562 +1,229 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Golf Plan Tracker</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
-</head>
-<body>
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Become the Golfer — 12-week tracker</title>
 <style>
-/* Layout: sticky header with two tabs. Today shows one card at a time and swipes through every card so far. Whole plan lists every stage as an accordion with checkboxes, required questions and a Certify button. */
-:root{
-  --bg:#edf1ef; --surface:#ffffff; --ink:#14211c; --muted:#53635c; --line:#cfd8d4;
-  --accent:#0b6b4f; --accent-ink:#ffffff; --warn:#fff1c9; --warn-ink:#4a3600; --done:#dbeee6; --lock:#e4e9e6;
-  --display:"Barlow Condensed","Arial Narrow",sans-serif; --body:"Barlow",system-ui,sans-serif;
-  --st-g:#1a9a63; --st-o:#e08a00; --st-r:#d6372c; --st-n:#9aa8a1;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0f1714; --surface:#17221e; --ink:#e7efeb; --muted:#9fb0a8; --line:#2a3a34;
-  --accent:#4cc79a; --accent-ink:#06261b; --warn:#3a3115; --warn-ink:#f5e2a6; --done:#1c3a2f; --lock:#131c18; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0f1714; --surface:#17221e; --ink:#e7efeb; --muted:#9fb0a8; --line:#2a3a34;
-  --accent:#4cc79a; --accent-ink:#06261b; --warn:#3a3115; --warn-ink:#f5e2a6; --done:#1c3a2f; --lock:#131c18; color-scheme:dark}
+:root{--bg:#111312;--card:#1b1e1d;--card2:#232725;--line:#333937;--tx:#e8e6e1;--dim:#9d9a92;--acc:#7fb069;--warn:#e0a458;--bad:#d9705f}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.4;margin:0;
-  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-main{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:14px 0 10px;border-bottom:1px solid var(--line)}
-h1{font-family:var(--display);font-size:2rem;line-height:1;margin:0}
-.sub{margin:4px 0 8px;color:var(--muted);font-size:.95rem}
-.meter{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
-.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
-.tabs{display:flex;gap:6px;margin-top:10px}
-.tabs button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:600 1rem var(--body);cursor:pointer}
-.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-button:focus-visible,a:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.col{display:flex;flex-direction:column;gap:12px}
-.stage{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.stage.done{background:var(--done)}
-.stage.locked{background:var(--lock);color:var(--muted)}
-.head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 14px;min-height:56px;width:100%;
-  background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.name{font-family:var(--display);font-size:1.3rem;line-height:1.1;display:block}
-.when{display:block;font-size:.88rem;color:var(--muted)}
-.state{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--accent)}
-.stage.locked .state{color:var(--muted)}
-.body{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
-.where{background:var(--warn);color:var(--warn-ink);border-radius:6px;padding:8px 10px;font-size:.92rem;font-weight:500}
-.focus{margin:0;font-size:.98rem}
-h3{font-family:var(--display);font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:4px 0 0}
-.stage.locked h3{color:var(--muted)}
-ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-li label{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-height:48px;cursor:pointer;background:var(--bg)}
-li input{width:24px;height:24px;margin:1px 0 0;accent-color:var(--accent);flex:none}
-li .t{min-width:0;flex:1}
-li b{display:block;font-weight:600}
-li small{display:block;color:var(--muted);font-size:.9rem}
-li input:checked + .t{opacity:.55}
-.links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.92rem}
-.links a{color:var(--accent)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;cursor:pointer;background:var(--bg);font-weight:500;font-size:.92rem}
-.chips input{width:20px;height:20px;accent-color:var(--accent)}
-.q{display:flex;flex-direction:column;gap:4px}
-.q span{font-size:.95rem;font-weight:600}
-.q span em{color:var(--accent);font-style:normal}
-textarea{width:100%;min-height:72px;font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;resize:vertical}
-textarea:disabled{opacity:.6}
-.go{min-height:52px;border:0;border-radius:6px;background:var(--accent);color:var(--accent-ink);font:700 1.1rem var(--display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer;width:100%}
-.go:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
-.alt{min-height:48px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:600 1rem var(--body);cursor:pointer;padding:0 14px}
-.alt:disabled{opacity:.45;cursor:not-allowed}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row > *{flex:1;min-width:120px}
-.nav .alt{font-size:1.4rem;line-height:1}
-.need{margin:0;font-size:.9rem;color:var(--muted)}
-.skip{font-size:.88rem;color:var(--muted)}
-.card{background:var(--surface);border:2px solid var(--accent);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;touch-action:pan-y}
-.card.fin{background:var(--done)}
-.kicker{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.card h2{font-family:var(--display);font-size:1.9rem;line-height:1.05;margin:0}
-.card p{margin:0}
-.dots{display:flex;gap:4px;flex-wrap:wrap}
-.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
-.dots i.d{background:var(--accent)}
-.dots i.c{outline:2px solid var(--ink);outline-offset:1px}
-.pace{background:var(--warn);color:var(--warn-ink);border-radius:6px;padding:8px 10px;font-size:.92rem}
-.count{font-family:var(--display);font-size:2.4rem;line-height:1}
-.dot{width:20px;height:20px;border-radius:50%;flex:none;background:var(--st-n);border:2px solid var(--st-n)}
-.dot.g{background:var(--st-g);border-color:var(--st-g)}
-.dot.o{background:var(--st-o);border-color:var(--st-o)}
-.dot.r{background:var(--st-r);border-color:var(--st-r)}
-.rt{display:flex;align-items:center;gap:8px;flex:none}
-.ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.kind{font-family:var(--display);font-size:1.15rem;letter-spacing:.04em;text-transform:uppercase}
-.legend{font-size:.82rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.legend .dot{width:12px;height:12px;border-width:0;display:inline-block;vertical-align:middle;margin-right:3px}
-.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:.85rem;align-items:center}
-.foot button{font:inherit;background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);padding:8px 12px;min-height:40px;cursor:pointer}
-@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
-[hidden]{display:none!important}
-</style>
-<main>
-  <header>
-    <h1>Golf Plan Tracker</h1>
-    <p class="sub" id="sub"></p>
-    <div class="meter" aria-hidden="true"><i id="fill"></i></div>
-    <div class="tabs"><button type="button" data-act="tab" data-v="today" id="tabT" aria-pressed="true">Today</button><button type="button" data-act="tab" data-v="plan" id="tabP" aria-pressed="false">Whole plan</button></div>
-  </header>
-  <div id="today"></div>
-  <div id="stages"></div>
-  <div class="col" id="bkp"><div class="row"><button class="alt" type="button" data-act="backup">Copy backup</button><button class="alt" type="button" data-act="restore">Restore backup</button></div><textarea id="bkbox" hidden placeholder="Paste a backup here"></textarea><button class="alt" type="button" id="bkload" data-act="load" hidden>Load this backup</button><p class="need" id="bkmsg">Your progress lives in this browser only. Copy a backup now and then, and send it to Claude at each checkpoint.</p></div>
-  <div class="foot"><span id="status">Loading...</span><button type="button" data-act="resetall" id="reset">Start over</button></div>
-</main>
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+h1{font-size:17px;margin:0;font-weight:500}
+.sub{color:var(--dim);font-size:13px;margin-top:2px}
+nav{display:flex;gap:6px;padding:10px 16px 0}
+nav button{flex:1;padding:9px;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:8px;font-size:14px;cursor:pointer}
+nav button[aria-pressed=true]{background:var(--card2);color:var(--tx);border-color:#4a524f}
+main{padding:14px 16px 60px;max-width:820px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.lbl{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+h2{font-size:16px;margin:0 0 4px;font-weight:500}
+h3{font-size:14px;margin:14px 0 6px;font-weight:500;color:var(--dim)}
+ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
+.chk{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #262a29}
+.chk:last-child{border:0}
+.chk input{margin-top:4px;width:17px;height:17px;flex:none;accent-color:var(--acc)}
+.chk.done span{text-decoration:line-through;color:var(--dim)}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;border:1px solid var(--line);color:var(--dim);margin-right:5px}
+.pill.cue{border-color:#4a6b3f;color:var(--acc)}
+.pill.cp{border-color:#7a5a2a;color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+th,td{text-align:left;padding:6px 7px;border-bottom:1px solid #262a29;vertical-align:top}
+th{color:var(--dim);font-weight:500;font-size:12px}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.wk{border:1px solid var(--line);border-radius:10px;margin-bottom:9px;overflow:hidden}
+.wkh{padding:10px 12px;background:var(--card2);cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.wkh b{font-weight:500}
+.wkb{padding:4px 12px 10px;display:none}
+.wk.open .wkb{display:block}
+textarea{width:100%;min-height:70px;background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px;font:13px/1.5 inherit;resize:vertical}
+button.act{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;margin:4px 6px 0 0}
+.note{color:var(--dim);font-size:13px}
+.warn{color:var(--warn)}.bad{color:var(--bad)}.ok{color:var(--acc)}
+code{background:var(--card2);padding:1px 5px;border-radius:4px;font-size:12px}
+</style></head><body>
+<header><h1>Become the Golfer</h1><div class="sub" id="hsub">12-week plan · 23 Nov 2026 to 14 Feb 2027</div></header>
+<nav>
+<button id="b-today" aria-pressed="true" onclick="setView('today')">Today</button>
+<button id="b-plan" aria-pressed="false" onclick="setView('plan')">Plan</button>
+<button id="b-data" aria-pressed="false" onclick="setView('data')">Data</button>
+<button id="b-log" aria-pressed="false" onclick="setView('log')">Notes</button>
+</nav>
+<main id="main"></main>
 <script>
-var V={
- ball:["Ball position and alignment","https://www.youtube.com/watch?v=hHVwZCaNJMM"],
- stick:["Using alignment sticks","https://www.youtube.com/watch?v=CW0XkyMOd0E"],
- grip:["How to grip a golf club (Titleist)","https://www.youtube.com/watch?v=FZoZMTbr1VA"],
- step:["Weight-shift and step drill","https://www.youtube.com/watch?v=08psc68Nbsc"],
- chair:["Chair drill for early extension","https://www.youtube.com/watch?v=RCJB3YRX4Rg"],
- chunk:["Wedge chunk fix","https://www.youtube.com/watch?v=gfqiJ80i11Q"],
- wing:["Fix the chicken wing","https://www.youtube.com/watch?v=LT-trEuoOD4"],
- glove:["Glove under the lead arm","https://www.youtube.com/watch?v=Z1fgcFOwTpQ"],
- rel:["Release drill","https://www.youtube.com/watch?v=1KPkyTkQxtU"],
- split:["Split grip drill (takeaway)","https://www.youtube.com/watch?v=YGLtp_IshaE"],
- gate:["Start line drill","https://www.youtube.com/watch?v=VgpX4StL6tU"],
- clock:["Wedge clock system","https://www.youtube.com/watch?v=I-nzA1ANnYw"],
- hard:["Chipping off hardpan","https://www.youtube.com/watch?v=uD-r12xNV4c"],
- tight:["Chipping from tight lies","https://m.youtube.com/watch?v=fwrrd1WnXks"],
- pgate:["Putting gate drills","https://www.youtube.com/watch?v=LCpF5bIavpE"],
- pclock:["Putting clock drill","https://www.youtube.com/watch?v=rhamXqEhXr4"],
- ppace:["Putting pace control","https://www.youtube.com/watch?v=MW_3nHv7DxA"],
- pdist:["Judge your putting distance","https://www.youtube.com/watch?v=FKS08KNPaJc"]
-};
-var CP="Checkpoint session: 10 balls each. Screenshot each table. Export the best and worst ball per club. Send them to Claude with one line on what felt different.";
-var S=[
-{id:"s0",name:"Week 1 · Baseline",when:"Oct 19 to 25",end:"2026-10-25",where:"Indoors, in the bay. No grass until Florida.",
- focus:"No swing changes. Run this list every session and log the session when it is done. The first-session tasks only show once. After the third session, answer the questions and certify.",sessions:3,perSession:true,
- tasks:[
-  ["Grip photos","Hands filling the frame, well lit. One from the front, one from behind. If the lead hand shows three or more knuckles, weaken it to two.","f"],
-  ["Address photos","A stick along your toes. One face-on, one down the line.","f"],
-  ["Turn on the TrackMan columns","Ball speed, smash, launch direction, spin axis, club path, face angle, face to path, attack angle, carry.","f"],
-  ["Calibrate your pace","Walk 30 yards and count steps. Walk 30 feet for putts. Write both on a card.","f"],
-  ["Ball position set with sticks","Irons and wedges at center. Fairway woods 2 to 3 inches forward. Keep your tested driver spot."],
-  ["Warm up","10 slow swings with the 8-iron, no ball."],
-  ["Baseline sets","10 balls each with the 54, 50, PW and 8-iron. Screenshot each table."],
-  ["40 to 80 yard ladder","5 balls each at 40, 50, 60, 70, 80 with the 58, 54 and 50. Guess the carry out loud first, then check."],
-  ["Putting, 10 minutes","Gate drill and three-distance zone on the mat or at home."]],
- vids:["ball","stick","grip","clock","pgate"]},
-{id:"s1",name:"Weeks 2 to 4 · The move, wedges and short irons",when:"Oct 26 to Nov 15",end:"2026-11-15",where:"Indoors. A towel 4 inches behind the ball tells you if you hit the mat first.",
- focus:"One cue: seat back, move toward the target, chest finishes at the flag. Aim it at a line on the mat.",sessions:7,perSession:true,
- tasks:[
-  ["Warm up and rehearse the cue","10 slow swings. Say it: seat back, toward the target, chest to the flag."],
-  ["Step drill","10 swings. Ask your doctor or physical therapist first."],
-  ["Chair drill","10 reps with no ball, then 5 half swings. Backside on the chair back, lead glute stays on it through impact."],
-  ["Wedge chunk work","20 balls with the 54. Towel behind the ball. Ball first. The towel stays put."],
-  ["Hold every finish for 3 seconds","15 balls with the 7-iron. Chest at the target. If you cannot hold it, your body stalled."],
-  ["Putting, 10 minutes","Gate drill and clock drill."],
-  ["Screenshot the tables","Level 1. One minute."],
-  ["Checkpoint session","10 balls each: 9-iron, 7-iron, 7-wood, 5-wood. Screenshot each table. Export the best and worst ball per club. Send them to Claude with one line on what felt different.","l"],
-  ["Checkpoint numbers met","Weak iron strikes 40% or less. Iron face-to-path +8° or less. 5-wood face-to-path spread 8° or less. Hooks 70% or less of tournament misses.","l"]],
- vids:["step","chair","chunk","pgate","pclock"]},
-{id:"s2",name:"Weeks 5 to 8 · The release and the iron face",when:"Nov 16 to Dec 13",end:"2026-12-13",where:"Indoors.",
- focus:"Same cue. Add the release so the lead arm does not fold and the iron face is not held open.",sessions:8,perSession:true,
- tasks:[
-  ["Warm up and rehearse the cue","10 slow swings."],
-  ["Lead-arm drill","Glove or headcover under the lead armpit, 15 half swings."],
-  ["Waist-to-waist swings","Both arms straight at the finish. 10 reps."],
-  ["Split-hand swings","Hands a few inches apart, slow. 10 reps."],
-  ["Start-line gate","Two tees a foot apart, 3 feet ahead of the ball. 15 balls with a mid-iron."],
-  ["Wedge ladder, one set","40, 50, 60, 70, 80. Guess first, then check."],
-  ["Putting, 10 minutes","Gate and clock drills. Speed will not match a real green."],
-  ["Screenshot the tables","Level 1."],
-  ["Checkpoint session","10 balls each: 9-iron, 7-iron, 7-wood, 5-wood, driver. Screenshot each table. Export the best and worst ball per club. Send them to Claude.","l"],
-  ["Checkpoint numbers met","Weak iron strikes 25% or less. Iron face-to-path +5° or less. 5-wood spread 7° or less. Driver spread 9° or less. Hooks 65% or less.","l"]],
- vids:["wing","glove","rel","split","gate"]},
-{id:"s3",name:"Weeks 9 to 12 · Fairway woods and long irons",when:"Dec 14 to Jan 10",end:"2027-01-10",where:"Indoors.",
- focus:"7-wood, 5-wood, 5-iron and any hybrid. Ball position forward, aim square, one wedge set a week.",sessions:8,perSession:true,
- tasks:[
-  ["Warm up and rehearse the cue","10 slow swings."],
-  ["Wood ball position checked with sticks","Every session. Forward 2 to 3 inches from center."],
-  ["Woods and long irons","15 balls each: 7-wood, 5-wood, 5-iron."],
-  ["Guess-then-check on the ladder","Say your guess for the carry before each ball. Write the error."],
-  ["Wedge set","One set a week so the move does not fade."],
-  ["Putting, 10 minutes","Pace drill: three distances."],
-  ["Screenshot the tables","Level 1."],
-  ["Checkpoint session","Same five clubs as the last checkpoint. Screenshot each table. Export the best and worst ball per club. Send them to Claude.","l"],
-  ["Checkpoint numbers met","Weak iron strikes 15% or less. Iron face-to-path within ±3°. 5-wood spread 6° or less. Driver spread 7° or less. Hooks 55% or less.","l"]],
- vids:["ball","clock","ppace"]},
-{id:"s4",name:"Weeks 13 to 16 · The driver",when:"Jan 11 to Feb 7",end:"2027-02-07",where:"Indoors.",
- focus:"Driver on your tested ball position. End each swing session with 5 drivers as a guardrail.",sessions:8,perSession:true,
- tasks:[
-  ["Warm up and rehearse the cue","10 slow swings."],
-  ["Irons and wedges","A quarter of the session."],
-  ["Fairway woods","10 balls each."],
-  ["5 drivers at the end","If the face-to-path spread gets wider, send Claude the clips before changing anything."],
-  ["Putting, 10 minutes","Distance control, three lengths."],
-  ["Screenshot the tables","Level 1."],
-  ["Checkpoint session","Same five clubs. Screenshot each table. Export the best and worst ball per club. Send them to Claude.","l"],
-  ["Checkpoint numbers met","Driver face-to-path within -3° to +1°, spread 5° or less. Hooks 50% or less. Putts per 18: 32 or fewer.","l"]],
- vids:["pdist","ppace"]},
-{id:"s5",name:"Weeks 17 and 18 · Taper",when:"Feb 8 to 21",end:"2027-02-21",where:"Indoors.",
- focus:"No new drills. Keep the cue and the shot routine. Put extra time into the ladder, chipping and putting.",sessions:4,perSession:true,
- tasks:[
-  ["Warm up and rehearse the cue","10 slow swings."],
-  ["Wedge ladder","Two sets, guess then check."],
-  ["Chipping on the mat","Landing spots with a towel. Putter and fairway wood for tight lies."],
-  ["Putting, 15 minutes","Gate, clock and pace."],
-  ["Decide the 58 or the 54 for the trip","","f"],
-  ["Check clubs and balls for the trip","","l"],
-  ["Rest the day before you travel","","l"]],
- vids:["clock","tight"]},
-{id:"s6",name:"Florida · Feb 22 to 28",when:"The trip",end:"2027-02-28",where:"Real grass for the first time since the fall.",
- focus:"Take a practice day before the first round. Putt first, then the ladder, then irons, woods and driver.",sessions:0,
- tasks:[
-  ["Practice day on grass before the first round","Putt 15 to 20 minutes first."],
-  ["Re-measure your carry for every club","Replace your sim yardages with these."],
-  ["Chip from tight lies","Putter or fairway wood when the ball sits down. Skip the 60."],
-  ["Play with your son and log the round","Hooks, straight, right. Putts. Up-and-downs."]],
- vids:["hard","tight","pdist"]}
-];
-var QD=["TrackMan numbers from this checkpoint. Type them in.","Back pain during this stage, 1 to 5?","One thing that felt different."];
-var QS={
- s0:["Lead-hand knuckles you see in the grip photo (number)?","Ball position you settled on for the 8-iron?","Carry yards you measured with the 54, 50 and 58 on the mat?"],
- s5:["Which wedge for the trip, 54 or 58, and why?","Back pain during this stage, 1 to 5?","What will you do on your practice day?"],
- s6:["Round log: hooks, straight and right misses.","Putts per round and up-and-downs.","What will you work on first when you get home?"]
-};
-function qs(s){return QS[s.id]||QD}
+const START="2026-11-23", END="2027-02-14";
+const CHECKPOINTS={"2026-12-21":"Checkpoint 1 (after week 4)","2027-01-18":"Checkpoint 2 (after week 8)","2027-02-15":"Checkpoint 3 (after week 12)"};
+const GATE={"2026-12-11":"Month gate: 7i and 9i median path -3.0 or better. Path only, off a regular session."};
+const FLEX={"2026-12-25":"Flex day","2027-01-01":"Flex day"};
+const PHASES=[
+ {w:[1,4],name:"Foundation",lift:"Technique and full range. 3 reps in reserve. Loads held at the week 1 anchor.",
+  cues:{1:"Cup less",2:"Cup less",3:"Arm hang at address",4:"Arm hang at address"}},
+ {w:[5,8],name:"Load increases",lift:"Add about 5% or 1-2 reps when all sets come in clean. 2 reps in reserve.",
+  cues:{5:"Coach to set",6:"Coach to set",7:"Coach to set",8:"Coach to set"}},
+ {w:[9,12],name:"Transfer",lift:"Lighter loads, fast intent, rotational power. 2 reps in reserve.",
+  cues:{9:"Coach to set",10:"Coach to set",11:"Coach to set",12:"Coach to set"}}];
+const DAYS=[
+ {d:1,n:"Monday",t:"bay",label:"Bay session",mins:"45-60"},
+ {d:2,n:"Tuesday",t:"A",label:"Workout A — heavy legs and core",mins:"45"},
+ {d:3,n:"Wednesday",t:"B",label:"Workout B — upper body and rotation",mins:"45"},
+ {d:4,n:"Thursday",t:"bay",label:"Bay session",mins:"45-60"},
+ {d:5,n:"Friday",t:"C",label:"Workout C — moderate full body",mins:"45"},
+ {d:6,n:"Saturday",t:"sbay",label:"Short bay — one block",mins:"30-40"},
+ {d:7,n:"Sunday",t:"round",label:"18 holes plus a brisk walk",mins:"—"}];
+const STEPS={
+ bay:["Morning: GolfForever 10-15 min (mobility, rotation, bands)",
+  "Warm-up 10 min — uncounted, never exported",
+  "Driver block, 10-15 shots. Current cue only.",
+  "7-iron block, 10-15 shots. Current cue only.",
+  "Stop a block if smash drops 0.05 below block 1, or the last 5 are 1.8 deg more out-to-in than the first 5",
+  "THEN the drill block: 9i or wedge, partial speed, 8-10 reps. Logged separately.",
+  "Export the session JSON and bring it to Claude with the master file"],
+ sbay:["Morning: GolfForever 10-15 min",
+  "Warm-up 10 min",
+  "ONE block only — driver or 7-iron, not both",
+  "Same stop rules",
+  "Drill block after, if there is time",
+  "Export the JSON"],
+ A:["Morning: GolfForever 10-15 min — no heavy lower body today",
+  "Squat pattern, hinge pattern, loaded carry, core",
+  "Week 1: find the load where 8-10 reps leaves 3 in reserve. Log it as the anchor.",
+  "Later weeks: load to the anchor, add per the phase rule",
+  "Log load, sets, reps and RIR",
+  "Nothing heavy touches the legs again before Thursday"],
+ B:["Morning: GolfForever 10-15 min",
+  "Press, row, rotation, anti-rotation. No heavy legs.",
+  "Log load, sets, reps and RIR"],
+ C:["Morning: GolfForever 10-15 min",
+  "Moderate full body. Lower-body loads at 70% or less of Tuesday.",
+  "Log load, sets, reps and RIR"],
+ round:["Morning: GolfForever 10-15 min",
+  "Play 18 in the bay",
+  "Export it, but tag it as a ROUND. Round shots never pool with block shots.",
+  "Log the score and anything patterned",
+  "Brisk walk 45-60 min (summer: walk the course)"]};
+const DAILY=["Three walks","Log food"];
 
-/* ---------- state ---------- */
-var CK="gpt:v2";
-var st={done:{},ans:{},cert:{},skip:{},updated:0};
-var ref=null,wTimer=null,writing=false,again=false,syncedOnce=false;
-var view="today",fi=-1,openMap={},confirmKey="";
-function norm(d){return {done:d.done||{},ans:d.ans||{},cert:d.cert||{},skip:d.skip||{},skipT:d.skipT||{},defer:d.defer||{},hist:d.hist||{},updated:d.updated||0}}
-function hs(){if(!st.hist)st.hist={};return st.hist}
-function sk(){if(!st.skipT)st.skipT={};return st.skipT}
-function df(){if(!st.defer)st.defer={};return st.defer}
-var cantKey="";
-function cacheLocal(){try{localStorage.setItem(CK,JSON.stringify(st))}catch(e){}}
-(function(){
-  try{var r=localStorage.getItem(CK);if(r)st=norm(JSON.parse(r));else{
-    var o=localStorage.getItem("gpt:v1");
-    if(o){var p=JSON.parse(o),d={};Object.keys(p.done||{}).forEach(function(k){if(p.done[k])d[k]=1});st=norm({done:d,skip:p.skip||{},updated:1})}
-  }}catch(e){}
-  try{var v=localStorage.getItem("gpt:view");if(v)view=v}catch(e){}
-})();
-function setStatus(t){document.getElementById("status").textContent=t}
-function save(){
-  st.updated=Date.now();cacheLocal();
-  if(!ref){setStatus("Saved on this device only");return}
-  setStatus("Saving...");
-  clearTimeout(wTimer);wTimer=setTimeout(flush,500);
-}
-function flush(){
-  wTimer=null;
-  if(!ref)return;
-  if(writing){again=true;return}
-  writing=true;
-  ref.set(JSON.parse(JSON.stringify(st))).then(function(){setStatus("Saved to your Claude account")}).catch(function(){setStatus("Could not save to your account. Saved on this device.")}).then(function(){writing=false;if(again){again=false;flush()}});
-}
-(async function(){
-  try{
-    var c=window.claude;
-    if(!c||!c.use){setStatus("Saved on this device only");return}
-    var db=await c.use("db");
-    if(!db){setStatus("Saved on this device only");return}
-    ref=db.doc("progress/main");
-    ref.onSnapshot(function(snap){
-      if(snap.metadata&&snap.metadata.hasPendingWrites)return;
-      if(writing||wTimer)return;
-      var d=snap.exists?snap.data():null;
-      if(d){
-        var ru=d.updated||0;
-        if(ru>st.updated){
-          if(document.activeElement&&document.activeElement.tagName==="TEXTAREA")return;
-          st=norm(d);cacheLocal();fi=-1;render();
-        }else if(ru<st.updated&&!syncedOnce){syncedOnce=true;flush();return}
-      }else if(st.updated>0&&!syncedOnce){syncedOnce=true;flush();return}
-      setStatus("Saved to your Claude account");
-    },function(){ref=null;setStatus("Saved on this device only")});
-  }catch(e){setStatus("Saved on this device only")}
-})();
+function iso(d){return d.toISOString().slice(0,10)}
+function addDays(s,n){const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)}
+function dayIndex(s){return Math.round((new Date(s+"T12:00:00")-new Date(START+"T12:00:00"))/864e5)}
+function weekOf(s){const i=dayIndex(s);return i<0?0:Math.floor(i/7)+1}
+function phaseOf(w){return PHASES.find(p=>w>=p.w[0]&&w<=p.w[1])||PHASES[2]}
+function fmt(s){const d=new Date(s+"T12:00:00");return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}
 
-/* ---------- logic ---------- */
-function esc(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
-function byId(id){for(var i=0;i<S.length;i++){if(S[i].id===id)return S[i]}}
-function sessKeys(s){var a=[];for(var i=0;i<s.sessions;i++)a.push(s.id+"s"+i);return a}
-function sessCount(s){return sessKeys(s).filter(function(k){return st.done[k]}).length}
-function act(s,i){if(!s.perSession)return true;var n=sessCount(s);if(n>=s.sessions)return true;var f=s.tasks[i][2];if(f==="f"&&n>0)return false;if(f==="l"&&n<s.sessions-1)return false;return true}
-function answered(s){return qs(s).filter(function(x,i){return (st.ans[s.id+"q"+i]||"").trim()}).length}
-function missing(s){
-  var t=0;s.tasks.forEach(function(x,i){if(!act(s,i))return;if(!st.done[s.id+"t"+i]&&!sk()[s.id+"t"+i])t++});if(s.perSession&&sessCount(s)>=s.sessions)t=0;
-  return {t:t,s:Math.max(0,s.sessions-sessCount(s)),q:qs(s).length-answered(s)};
-}
-function gateText(m){
-  var p=[];
-  if(m.t)p.push(m.t+" task"+(m.t>1?"s":""));
-  if(m.s)p.push(m.s+" session"+(m.s>1?"s":""));
-  if(m.q)p.push(m.q+" question"+(m.q>1?"s":""));
-  return p.length?"Still needed: "+p.join(", ")+".":"Everything is done. You can certify.";
-}
-function isClosed(s){return !!st.cert[s.id]||!!st.skip[s.id]}
-function curIndex(){for(var i=0;i<S.length;i++){if(!isClosed(S[i]))return i}return -1}
-function stageCards(s){
-  var a=[];
-  var tl=s.tasks.map(function(t,i){return {s:s,k:"t",i:i,key:s.id+"t"+i}}).filter(function(x){return act(s,x.i)});
-  tl.sort(function(x,y){return (df()[x.key]||0)-(df()[y.key]||0)||x.i-y.i});
-  tl.forEach(function(x){a.push(x)});
-  if(s.sessions)a.push({s:s,k:"s"});
-  a.push({s:s,k:"q"});a.push({s:s,k:"c"});
-  return a;
-}
-function cardDone(c){
-  var s=c.s;
-  if(c.k==="t")return !!st.done[c.key]||!!sk()[c.key]||(!!s.perSession&&sessCount(s)>=s.sessions);
-  if(c.k==="s")return sessCount(s)>=s.sessions;
-  if(c.k==="q")return answered(s)===qs(s).length;
-  return !!st.cert[s.id];
-}
-/* every card from the first stage through the current one, so Back reaches finished work */
-function flat(cur){
-  var last=cur<0?S.length-1:cur,a=[];
-  for(var i=0;i<=last;i++)a=a.concat(stageCards(S[i]));
-  return a;
-}
-function autoIndex(list,cur){
-  var s=cur<0?S[S.length-1]:S[cur];
-  for(var i=0;i<list.length;i++){if(list[i].s===s&&!cardDone(list[i]))return i}
-  for(var j=list.length-1;j>=0;j--){if(list[j].s===s)return j}
-  return 0;
-}
-function syncGate(){
-  var b=document.querySelectorAll("[data-cert]");
-  for(var i=0;i<b.length;i++){
-    var s=byId(b[i].getAttribute("data-cert"));if(!s)continue;
-    var m=missing(s);
-    b[i].disabled=!!(m.t||m.s||m.q)||isClosed(s);
-  }
-  var g=document.querySelectorAll("[data-gt]");
-  for(var j=0;j<g.length;j++){var s2=byId(g[j].getAttribute("data-gt"));if(s2)g[j].textContent=isClosed(s2)?"This stage is closed.":gateText(missing(s2))}
-}
-function linksHtml(s){
-  if(!s.vids||!s.vids.length)return "";
-  return '<h3>Watch</h3><div class="links">'+s.vids.map(function(v){return '<a href="'+V[v][1]+'" target="_blank" rel="noopener">'+esc(V[v][0])+'</a>'}).join("")+'</div>';
-}
-function stageStatus(s){
-  var i=S.indexOf(s),cur=curIndex();
-  if(st.cert[s.id])return {c:"g",l:"Complete"};
-  if(st.skip[s.id])return {c:"n",l:"Skipped"};
-  var m=missing(s),started=(m.t<s.tasks.length)||sessCount(s)>0||answered(s)>0;
-  var over=(cur>=0&&i<=cur)&&(new Date(s.end+"T23:59:59")<new Date());
-  if(over)return {c:"r",l:"Past target date"};
-  if(started)return {c:"o",l:"In progress"};
-  return {c:"n",l:"Not started"};
-}
-function chipsHtml(s,dis){
-  var h='<div class="chips">';
-  for(var q=0;q<s.sessions;q++){var kk=s.id+"s"+q;h+='<label><input type="checkbox" data-k="'+kk+'" '+(st.done[kk]?'checked ':'')+(dis||s.perSession?'disabled':'')+'>'+(q+1)+'</label>'}
-  return h+'</div>';
-}
-function legendHtml(){return '<div class="legend"><span><span class="dot g"></span>Complete</span><span><span class="dot o"></span>In progress</span><span><span class="dot r"></span>Past target date</span><span><span class="dot"></span>Not started</span></div>'}
-var PD=["Example: weak strikes 40%, iron F2P +8, 5W spread 8, driver spread 9, hooks 70%, putts 34","Example: 2 (1 = none, 5 = severe). Add where if it is 3 or more.","Example: finish felt balanced, did not fall back."];
-var PH={
- s0:["Example: 3","Example: center of stance, or 1 ball forward","Example: 54 = 70, 50 = 90, 58 = 55 (club = carry yards)"],
- s1:["Example: weak strikes 40%, iron F2P +8, 5W spread 8, hooks 70%",PD[1],PD[2]],
- s5:["Example: 54, because the lies are tight",PD[1],"Example: putt 20 min, ladder, then irons"],
- s6:["Example: hooks 5, straight 10, right 3","Example: putts 34, up-and-downs 4 of 9","Example: wedge distances"]
-};
-function qph(s,i){return (PH[s.id]||PD)[i]||""}
-function taskActions(key){
-  var h='<button class="go" type="button" data-act="done" data-key="'+key+'">Done, next card</button>';
-  if(cantKey!==key)return h+'<button class="alt" type="button" data-act="cant" data-key="'+key+'">I cannot do this now</button>';
-  return h+'<p class="need">Why not? Skipping counts as handled, and I will see the reason.</p><div class="row">'+["Weather","Back or pain","No time","Other"].map(function(r){return '<button class="alt" type="button" data-act="skipT" data-key="'+key+'" data-r="'+r+'">'+r+'</button>'}).join("")+'</div><div class="row"><button class="alt" type="button" data-act="later" data-key="'+key+'">Do it later in this stage</button><button class="alt" type="button" data-act="cantno">Cancel</button></div>';
-}
-function qHtml(s,dis){
-  return qs(s).map(function(q,i){
-    var k=s.id+"q"+i;
-    return '<label class="q"><span>'+esc(q)+' <em>required</em></span><textarea data-q="'+k+'" id="q-'+k+'" placeholder="'+esc(qph(s,i)).replace(/"/g,'&quot;')+'" '+(dis?'disabled':'')+'>'+esc(st.ans[k]||"")+'</textarea></label>';
-  }).join("");
+const CK="btg:v1";
+let st={ticks:{},notes:{}};
+try{st=JSON.parse(localStorage.getItem(CK))||st}catch(e){}
+function save(){try{localStorage.setItem(CK,JSON.stringify(st))}catch(e){}}
+function tick(k,v){st.ticks[k]=v;save()}
+
+let view="today";
+try{view=localStorage.getItem("btg:view")||"today"}catch(e){}
+function setView(v){view=v;try{localStorage.setItem("btg:view",v)}catch(e){}
+ ["today","plan","data","log"].forEach(x=>document.getElementById("b-"+x).setAttribute("aria-pressed",String(x===v)));render()}
+
+function dayCard(date,opts){
+ const w=weekOf(date), ph=phaseOf(w), di=((dayIndex(date)%7)+7)%7, day=DAYS[di];
+ const cue=ph.cues[w]||"Coach to set";
+ const cp=CHECKPOINTS[date], gate=GATE[date], flex=FLEX[date];
+ let h=`<div class="card"><div class="lbl">${fmt(date)} · week ${w} of 12 · ${ph.name}</div>`;
+ h+=`<h2>${day.label}</h2><div class="sub">${day.mins==="—"?"":day.mins+" min · "}`;
+ h+=(day.t==="bay"||day.t==="sbay")?`<span class="pill cue">Cue: ${cue}</span>`:"";
+ if(cp)h+=`<span class="pill cp">${cp}</span>`;
+ if(gate)h+=`<span class="pill cp">Month gate</span>`;
+ if(flex)h+=`<span class="pill">Flex day</span>`;
+ h+=`</div>`;
+ if(gate)h+=`<p class="warn note">${gate}</p>`;
+ if(cp)h+=`<p class="warn note">Expanded protocol: 10 uncounted, driver 15, 7-iron 15 fresh and first, then the survey block (50&deg;, 9i, 5i, 5w) with one club promoted to 15 and the rest at 5.</p>`;
+ if(flex)h+=`<p class="note">Move or skip this session. The week still works.</p>`;
+ const steps=STEPS[day.t]||[];
+ h+=steps.map((s,i)=>{const k=date+":"+i,on=!!st.ticks[k];
+  return `<label class="chk${on?" done":""}"><input type="checkbox" ${on?"checked":""} onchange="tick('${k}',this.checked);render()"><span>${s}</span></label>`}).join("");
+ h+=`<h3>Every day</h3>`+DAILY.map((s,i)=>{const k=date+":d"+i,on=!!st.ticks[k];
+  return `<label class="chk${on?" done":""}"><input type="checkbox" ${on?"checked":""} onchange="tick('${k}',this.checked);render()"><span>${s}</span></label>`}).join("");
+ h+=`<h3>Notes</h3><textarea onchange="st.notes['${date}']=this.value;save()" placeholder="What you felt, what you changed, anything odd">${(st.notes[date]||"").replace(/</g,"&lt;")}</textarea>`;
+ h+=`</div>`;
+ return h;
 }
 
-/* ---------- render ---------- */
+function viewToday(){
+ const t=iso(new Date());
+ let d=t;
+ if(d<START)d=START; if(d>"2027-02-15")d="2027-02-15";
+ let h=dayCard(d);
+ h+=`<div class="card"><div class="lbl">Coming up</div><table><tr><th>Day</th><th>Session</th></tr>`;
+ for(let i=1;i<=4;i++){const nd=addDays(d,i);if(nd>"2027-02-15")break;
+  const di=((dayIndex(nd)%7)+7)%7;h+=`<tr><td>${fmt(nd)}</td><td>${DAYS[di].label}</td></tr>`}
+ h+=`</table></div>`;
+ return h;
+}
+
+function viewPlan(){
+ let h=`<div class="card"><div class="lbl">Dates</div><table>
+ <tr><th>Milestone</th><th>Date</th></tr>
+ <tr><td>Week 1 starts</td><td>Mon 23 Nov 2026</td></tr>
+ <tr><td>Month gate (path only)</td><td>Fri 11 Dec 2026</td></tr>
+ <tr><td>Checkpoint 1</td><td>Mon 21 Dec 2026</td></tr>
+ <tr><td>Checkpoint 2</td><td>Mon 18 Jan 2027</td></tr>
+ <tr><td>Week 12 ends</td><td>Sun 14 Feb 2027</td></tr>
+ <tr><td>Checkpoint 3</td><td>Mon 15 Feb 2027</td></tr></table></div>`;
+ for(let w=1;w<=12;w++){
+  const ph=phaseOf(w), s=addDays(START,(w-1)*7);
+  const open=w===weekOf(iso(new Date()))?" open":"";
+  h+=`<div class="wk${open}"><div class="wkh" onclick="this.parentNode.classList.toggle('open')">
+   <span><b>Week ${w}</b> <span class="note">${fmt(s)} &ndash; ${fmt(addDays(s,6))}</span></span>
+   <span class="note">${ph.name}</span></div><div class="wkb">
+   <p class="note">Cue: ${ph.cues[w]}. Lifting: ${ph.lift}</p><table><tr><th>Day</th><th>Session</th><th>Flag</th></tr>`;
+  for(let i=0;i<7;i++){const dt=addDays(s,i);
+   const f=CHECKPOINTS[dt]?"Checkpoint":GATE[dt]?"Month gate":FLEX[dt]?"Flex":"";
+   h+=`<tr><td>${fmt(dt)}</td><td>${DAYS[i].label}</td><td class="warn">${f}</td></tr>`}
+  h+=`</table></div></div>`}
+ return h;
+}
+
+let MASTER=null;
+function viewData(){
+ if(!MASTER)return `<div class="card"><div class="lbl">Data</div><p class="note">Loading <code>data/golf-trackman-data-master.json</code>&hellip; if this stays, the file is missing or you are opening the page from the filesystem rather than a server.</p></div>`;
+ const rows=[];
+ MASTER.sessions.forEach(s=>{if(s.type==="round")return;
+  Object.entries(s.clubs||{}).forEach(([c,m])=>{
+   const g=k=>m[k]&&m[k].median!==undefined?m[k].median:null;
+   rows.push({date:s.date,club:c,src:s.dataSource,path:g("clubPath"),f2p:g("faceToPath"),
+    off:g("impactOffsetMm"),low:g("lowPointMm"),pct:m.pctFaceWithin3??null})})});
+ let h=`<div class="card"><div class="lbl">Session history</div><table>
+ <tr><th>Date</th><th>Club</th><th class="n">Path</th><th class="n">F2P</th><th class="n">Offset mm</th><th class="n">Low pt mm</th><th class="n">% w/in 3</th><th>Source</th></tr>`;
+ rows.forEach(r=>{
+  const pc=r.path===null?"":(r.path>=-3?"ok":r.path>=-4?"warn":"bad");
+  h+=`<tr><td>${r.date}</td><td>${r.club}</td>
+  <td class="n ${pc}">${r.path??"—"}</td><td class="n">${r.f2p??"—"}</td>
+  <td class="n">${r.off??"—"}</td><td class="n">${r.low??"—"}</td>
+  <td class="n">${r.pct??"—"}</td><td class="note">${r.src}</td></tr>`});
+ h+=`</table><p class="note">Path colour: green at -3.0 or better, amber to -4.0, red beyond. Noise lines — path 1.8&deg;, face-to-path 4.7&deg;, offset 14 mm, smash 0.05. A smaller change is not a change.</p></div>`;
+ const f=MASTER.findings||[];
+ if(f.length){h+=`<div class="card"><div class="lbl">Findings</div>`+
+  f.map(x=>`<p class="note"><b>${x.topic}</b> &mdash; ${x.text}</p>`).join("")+`</div>`}
+ const q=MASTER.openQuestions||[];
+ if(q.length){h+=`<div class="card"><div class="lbl">Open questions</div><ul class="note">`+
+  q.map(x=>`<li>${x}</li>`).join("")+`</ul></div>`}
+ return h;
+}
+
+function viewLog(){
+ const ks=Object.keys(st.notes).filter(k=>st.notes[k]&&st.notes[k].trim()).sort().reverse();
+ let h=`<div class="card"><div class="lbl">Saved notes</div>`;
+ h+=ks.length?ks.map(k=>`<p><b>${fmt(k)}</b><br><span class="note">${st.notes[k].replace(/</g,"&lt;").replace(/\n/g,"<br>")}</span></p>`).join(""):`<p class="note">No notes yet.</p>`;
+ h+=`</div><div class="card"><div class="lbl">Backup</div>
+ <p class="note">Progress is saved in this browser only. Copy this out before clearing your browser, or to move to another device.</p>
+ <textarea id="bk">${JSON.stringify(st)}</textarea>
+ <button class="act" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('bk').value)">Copy</button>
+ <button class="act" onclick="restore()">Restore from the box</button>
+ <button class="act" onclick="if(confirm('Erase all ticks and notes?')){st={ticks:{},notes:{}};save();render()}">Erase</button></div>`;
+ return h;
+}
+function restore(){try{const v=JSON.parse(document.getElementById("bk").value);
+ if(v&&v.ticks){st=v;save();render()}}catch(e){alert("That is not a valid backup.")}}
+
 function render(){
-  var cur=curIndex();
-  var closed=S.filter(isClosed).length;
-  document.getElementById("fill").style.width=(closed*100/S.length)+"%";
-  document.getElementById("sub").textContent=cur<0?"Every stage is certified.":("Stage "+(cur+1)+" of "+S.length+": "+S[cur].name);
-  document.getElementById("tabT").setAttribute("aria-pressed",view==="today");
-  document.getElementById("tabP").setAttribute("aria-pressed",view==="plan");
-  document.getElementById("today").style.display=view==="today"?"":"none";
-  document.getElementById("stages").style.display=view==="plan"?"":"none";
-  renderToday(cur);renderPlan(cur);syncGate();
+ document.getElementById("main").innerHTML=
+  view==="today"?viewToday():view==="plan"?viewPlan():view==="data"?viewData():viewLog();
 }
-function renderToday(cur){
-  var el=document.getElementById("today");
-  var list=flat(cur);
-  if(fi<0||fi>=list.length)fi=autoIndex(list,cur);
-  var c=list[fi],s=c.s,done=cardDone(c),closed=isClosed(s);
-  var sc=stageCards(s),pos=sc.findIndex(function(x){return x.k===c.k&&x.i===c.i});
-  var ss=stageStatus(s);
-  var kind=c.k==="t"?"Task":(c.k==="s"?"Sessions, tick "+s.sessions:(c.k==="q"?"Required questions":"Certify"));
-  var h='<div class="card'+(done?' fin':'')+'" id="cardbox"><div class="ch"><span class="kicker">'+esc(s.name)+'</span><span class="dot '+ss.c+'" role="img" aria-label="'+ss.l+'" title="'+ss.l+'"></span></div><span class="kind">Step '+(pos+1)+' of '+sc.length+' · '+esc(kind)+(closed?' · closed':'')+'</span><div class="dots" aria-hidden="true">'+sc.map(function(x,i){return '<i class="'+(cardDone(x)?'d ':'')+(i===pos?'c':'')+'"></i>'}).join("")+'</div>';
-  if(c.k==="t"){
-    var t=s.tasks[c.i];
-    h+='<h2>'+esc(t[0])+'</h2>'+(t[1]?'<p>'+esc(t[1])+'</p>':'')+(t[2]==="f"?'<p class="need">First session only.</p>':(t[2]==="l"?'<p class="need">Last session only.</p>':''))+'<div class="where">'+esc(s.where)+'</div>'+linksHtml(s);
-    if(!done)h+=taskActions(c.key);
-    else if(!closed)h+=(sk()[c.key]?'<p class="need">Skipped: '+esc(sk()[c.key].r)+'</p>':'')+'<div class="row"><button class="alt" type="button" data-act="reset" data-key="'+c.key+'">'+(sk()[c.key]?'Undo skip':'Reset card')+'</button></div>';
-    else h+='<p class="need">Done. Reopen the stage in Whole plan to change it.</p>';
-  }else if(c.k==="s"){
-    var n=sessCount(s);
-    h+='<h2>Log your sessions</h2>'+(s.perSession?'<p>Do all the tasks each session. Log the session when they are all done. The tasks then reset for the next session.</p>':'<p>Each one-hour session counts. The 18-hole indoor tournament counts too.</p>')+'<div class="count">'+n+' of '+s.sessions+'</div>'+chipsHtml(s,closed)+(s.perSession&&n<s.sessions&&missing(s).t>0?'<p class="need">Tasks left this session: '+missing(s).t+'</p>':'');
-    if(!closed)h+='<div class="row"><button class="go" type="button" data-act="sess+" '+(n>=s.sessions||(s.perSession&&missing(s).t>0)?'disabled':'')+'>Log a session</button><button class="alt" type="button" data-act="sess-" '+(n<1?'disabled':'')+'>Undo last</button></div>';
-  }else if(c.k==="q"){
-    h+='<h2>Required questions</h2><p>Answer all of them before you can certify. Keep each answer to one short line. The gray text in each box shows the format I want.</p>'+qHtml(s,closed);
-  }else{
-    h+='<h2>Certify this stage</h2><p class="need" data-gt="'+s.id+'"></p>'+(closed?'<div class="row"><button class="alt" type="button" data-act="reopen" data-id="'+s.id+'">Reopen this stage</button></div>':'<button class="go" type="button" data-act="cert" data-cert="'+s.id+'">Certify and unlock the next stage</button>');
-  }
-  h+='<div class="row nav"><button class="alt" type="button" data-act="nav" data-d="-1" aria-label="Previous card" '+(fi<1?'disabled':'')+'>&larr;</button><button class="alt" type="button" data-act="nav" data-d="1" aria-label="Next card" '+(fi>=list.length-1?'disabled':'')+'>&rarr;</button></div>';
-  if(!closed){
-    var days=Math.ceil((new Date(s.end+"T23:59:59")-new Date())/864e5);
-    var left=sc.filter(function(x){return !cardDone(x)}).length;
-    var pace=days>=0?("Target for this stage: "+s.end+" ("+days+" day"+(days===1?"":"s")+" away). "+left+" step"+(left===1?"":"s")+" left. Finish early and you move on early."):("Past the target date of "+s.end+". Nothing locks you out. "+left+" step"+(left===1?"":"s")+" left.");
-    h+='<div class="pace">'+esc(pace)+'</div>';
-  }
-  h+='</div>';
-  el.innerHTML=h;
-}
-function renderPlan(cur){
-  var h="";
-  S.forEach(function(s,i){
-    var state=st.cert[s.id]||st.skip[s.id]?"done":(i===cur?"current":"locked");
-    var label=st.cert[s.id]?"Certified":(st.skip[s.id]?"Skipped":(i===cur?"Now":"Locked"));
-    var isOpen=openMap[s.id]!==undefined?openMap[s.id]:(i===cur);
-    var dis=state==="locked";var ss2=stageStatus(s);
-    var m=missing(s);
-    var line=s.when+" · "+(s.tasks.length-m.t)+"/"+s.tasks.length+" tasks"+(s.sessions?" · "+sessCount(s)+"/"+s.sessions+" sessions":"")+" · "+answered(s)+"/"+qs(s).length+" answers";
-    h+='<section class="stage '+state+'"><button class="head" type="button" data-act="toggle" data-id="'+s.id+'" aria-expanded="'+isOpen+'"><span><span class="name">'+esc(s.name)+'</span><span class="when">'+esc(line)+'</span></span><span class="rt"><span class="state">'+label+'</span><span class="dot '+ss2.c+'" role="img" aria-label="'+ss2.l+'" title="'+ss2.l+'"></span></span></button>';
-    if(isOpen){
-      h+='<div class="body"><div class="where">'+esc(s.where)+'</div><p class="focus">'+esc(s.focus)+'</p><h3>To do</h3><ul>';
-      s.tasks.forEach(function(t,j){var k=s.id+"t"+j;
-        h+='<li><label><input type="checkbox" data-k="'+k+'" '+(st.done[k]?'checked ':'')+(dis?'disabled':'')+'><span class="t"><b>'+esc(t[0])+'</b>'+(t[1]?'<small>'+esc(t[1])+'</small>':'')+(t[2]==="f"?'<small><b>First session only.</b></small>':(t[2]==="l"?'<small><b>Last session only.</b></small>':''))+(sk()[k]?'<small><b>Skipped: '+esc(sk()[k].r)+'. Tick to mark it done instead.</b></small>':'')+'</span></label></li>'});
-      h+='</ul>';
-      if(s.sessions){
-        h+='<h3>Sessions (the tournament counts)</h3><div class="chips">';
-        for(var q=0;q<s.sessions;q++){var kk=s.id+"s"+q;h+='<label><input type="checkbox" data-k="'+kk+'" '+(st.done[kk]?'checked ':'')+(dis||s.perSession?'disabled':'')+'>'+(q+1)+'</label>'}
-        h+='</div>';
-      }
-      h+=linksHtml(s);
-      h+='<h3>Required questions</h3>'+qHtml(s,dis);
-      if(state==="current"){
-        h+='<button class="go" type="button" data-act="cert" data-cert="'+s.id+'" disabled>Certify and unlock the next stage</button><p class="need" data-gt="'+s.id+'"></p>';
-        if(confirmKey===s.id)h+='<div class="skip">Skip this stage without finishing it? <button class="alt" type="button" data-act="skipyes" data-id="'+s.id+'">Yes, skip</button> <button class="alt" type="button" data-act="skipno">Cancel</button></div>';
-        else h+='<div class="skip"><button class="alt" type="button" data-act="skip" data-id="'+s.id+'">Skip this stage</button></div>';
-      }else if(state==="done"){
-        h+='<div class="skip"><button class="alt" type="button" data-act="reopen" data-id="'+s.id+'">Reopen this stage</button></div>';
-      }
-      h+='</div>';
-    }
-    h+='</section>';
-  });
-  document.getElementById("stages").innerHTML='<div class="col">'+legendHtml()+h+'</div>';
-}
-
-/* ---------- events ---------- */
-function go(d){
-  var cur=curIndex(),list=flat(cur);
-  var n=fi+d;
-  if(n<0||n>=list.length)return;
-  fi=n;render();window.scrollTo(0,0);
-}
-document.addEventListener("click",function(e){
-  var el=e.target.closest?e.target.closest("[data-act]"):null;
-  if(!el||el.disabled)return;
-  var a=el.getAttribute("data-act"),id=el.getAttribute("data-id");
-  var cur=curIndex(),s=cur>=0?S[cur]:null;
-  if(a==="backup"){
-    var txt=JSON.stringify(st),bm=document.getElementById("bkmsg"),bb=document.getElementById("bkbox");
-    var ok=function(){bm.textContent="Backup copied. Paste it somewhere safe."};
-    var fb=function(){bb.hidden=false;bb.value=txt;bb.select();bm.textContent="Select all, copy, and keep this text."};
-    try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(x){fb()}
-    return;
-  }
-  if(a==="restore"){var b2=document.getElementById("bkbox");b2.hidden=false;b2.value="";document.getElementById("bkload").hidden=false;document.getElementById("bkmsg").textContent="Paste a backup, then tap Load.";return}
-  if(a==="load"){
-    try{var o=JSON.parse(document.getElementById("bkbox").value);if(!o||typeof o!=="object"||!o.done)throw 1;st=norm(o);save();fi=-1;openMap={};document.getElementById("bkbox").hidden=true;document.getElementById("bkload").hidden=true;document.getElementById("bkmsg").textContent="Backup loaded.";render()}
-    catch(x){document.getElementById("bkmsg").textContent="That does not look like a backup."}
-    return;
-  }
-  if(a==="tab"){view=el.getAttribute("data-v");try{localStorage.setItem("gpt:view",view)}catch(x){}render();window.scrollTo(0,0);return}
-  if(a==="toggle"){openMap[id]=!(openMap[id]!==undefined?openMap[id]:(S.indexOf(byId(id))===cur));render();return}
-  if(a==="done"){
-    var k=el.getAttribute("data-key");st.done[k]=Date.now();save();
-    var list=flat(cur),nx=fi+1,here=list[fi].s;
-    for(var i=fi+1;i<list.length;i++){if(list[i].s===here&&!cardDone(list[i])){nx=i;break}}
-    fi=Math.min(nx,list.length-1);render();window.scrollTo(0,0);return;
-  }
-  if(a==="reset"){var rk=el.getAttribute("data-key");delete st.done[rk];delete sk()[rk];save();render();return}
-  if(a==="cant"){cantKey=el.getAttribute("data-key");render();return}
-  if(a==="cantno"){cantKey="";render();return}
-  if(a==="skipT"){var kx=el.getAttribute("data-key");sk()[kx]={r:el.getAttribute("data-r"),t:Date.now()};cantKey="";save();fi=-1;render();window.scrollTo(0,0);return}
-  if(a==="later"){var ky=el.getAttribute("data-key");df()[ky]=Date.now();cantKey="";save();fi=-1;render();window.scrollTo(0,0);return}
-  if(a==="nav"){go(parseInt(el.getAttribute("data-d"),10));return}
-  if(a==="sess+"&&s){
-    if(s.perSession&&missing(s).t>0)return;
-    var ks=sessKeys(s),nn=-1;
-    for(var j=0;j<ks.length;j++){if(!st.done[ks[j]]){st.done[ks[j]]=Date.now();nn=j;break}}
-    if(nn>=0&&s.perSession){
-      var rec={t:Date.now(),skipped:[]};
-      s.tasks.forEach(function(x,i){var k2=s.id+"t"+i;if(sk()[k2])rec.skipped.push(x[0]+": "+sk()[k2].r);delete st.done[k2];delete sk()[k2]});
-      hs()[s.id+"n"+(nn+1)]=rec;fi=-1;
-    }
-    save();render();window.scrollTo(0,0);return}
-  if(a==="sess-"&&s){var kk=sessKeys(s);for(var q=kk.length-1;q>=0;q--){if(st.done[kk[q]]){delete st.done[kk[q]];break}}save();render();return}
-  if(a==="cert"){
-    var cs=byId(el.getAttribute("data-cert"));var mm=missing(cs);
-    if(mm.t||mm.s||mm.q||isClosed(cs))return;
-    st.cert[cs.id]=Date.now();save();fi=-1;openMap={};render();window.scrollTo(0,0);return;
-  }
-  if(a==="skip"){confirmKey=id;render();return}
-  if(a==="skipno"){confirmKey="";render();return}
-  if(a==="skipyes"){st.skip[id]=Date.now();confirmKey="";fi=-1;openMap={};save();render();return}
-  if(a==="reopen"){delete st.cert[id];delete st.skip[id];fi=-1;openMap={};save();render();return}
-  if(a==="resetall"){
-    if(confirmKey==="reset"){st={done:{},ans:{},cert:{},skip:{},updated:0};confirmKey="";fi=-1;openMap={};save();render();el.textContent="Start over";return}
-    confirmKey="reset";el.textContent="Tap again to erase everything";return;
-  }
-});
-document.addEventListener("change",function(e){
-  var t=e.target;
-  var k=t.getAttribute&&t.getAttribute("data-k");
-  if(k){if(t.checked){st.done[k]=Date.now();delete sk()[k]}else delete st.done[k];save();var y=window.scrollY;render();window.scrollTo(0,y)}
-});
-document.addEventListener("input",function(e){
-  var t=e.target;
-  var k=t.getAttribute&&t.getAttribute("data-q");
-  if(k){st.ans[k]=t.value;save();syncGate()}
-});
-/* swipe and arrow keys move between cards */
-var sx=0,sy=0,sOk=false;
-document.addEventListener("touchstart",function(e){
-  var t=e.target;
-  sOk=view==="today"&&t.closest&&t.closest("#cardbox")&&t.tagName!=="TEXTAREA"&&t.tagName!=="A";
-  if(sOk){sx=e.touches[0].clientX;sy=e.touches[0].clientY}
-},{passive:true});
-document.addEventListener("touchend",function(e){
-  if(!sOk)return;sOk=false;
-  var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>60&&Math.abs(dy)<45)go(dx<0?1:-1);
-},{passive:true});
-document.addEventListener("keydown",function(e){
-  var t=e.target&&e.target.tagName;
-  if(view!=="today"||t==="TEXTAREA"||t==="INPUT")return;
-  if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1);
-});
-render();
-</script>
-
-</body>
-</html>
+fetch("data/golf-trackman-data-master.json").then(r=>r.ok?r.json():null).then(j=>{MASTER=j;if(view==="data")render()}).catch(()=>{});
+setView(view);
+</script></body></html>
